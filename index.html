@@ -1,0 +1,3346 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=5">
+<meta name="theme-color" content="#ffffff">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Carnet">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="description" content="Entretien, contrôle technique et cote de tes véhicules. Hors ligne, données locales.">
+<title>Carnet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="icon" id="favicon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230E7490'/%3E%3Cpath d='M16 44a16 16 0 1 1 32 0M32 44 42.5 29.5' fill='none' stroke='%23fff' stroke-width='5' stroke-linecap='round'/%3E%3C/svg%3E">
+<style>
+:root{
+  /* Clair — papier blanc, encre noire, un seul accent. */
+  --fond:#ffffff; --fond2:#fafafa; --carte:#ffffff;
+  --trait:#e6e6e9; --trait2:#f1f1f4;
+  --texte:#000000; --gris:#71717a; --gris2:#a1a1aa;
+  --acc:#0E7490; --accF:rgba(14,116,144,.08); --accB:rgba(14,116,144,.35); --surAcc:#ffffff;
+  --ok:#0B6B45;   --okF:rgba(11,107,69,.09);
+  --att:#B3701E;  --attF:rgba(179,112,30,.10);
+  --dang:#B32424; --dangF:rgba(179,36,36,.08);
+  --voile:rgba(255,255,255,.88);
+  --ombre:0 1px 2px rgba(0,0,0,.04), 0 8px 28px rgba(0,0,0,.06);
+  --r:12px;
+  --tab:calc(58px + env(safe-area-inset-bottom));
+}
+html[data-theme="sombre"]{
+  --fond:#0d0d10; --fond2:#141418; --carte:#141418;
+  --trait:#26262d; --trait2:#1c1c22;
+  --texte:#f6f6f7; --gris:#9a9aa4; --gris2:#6d6d78;
+  --accF:rgba(255,255,255,.06); --accB:rgba(255,255,255,.22); --surAcc:#ffffff;
+  --ok:#4ADE9B;   --okF:rgba(74,222,155,.10);
+  --att:#F0B45C;  --attF:rgba(240,180,92,.12);
+  --dang:#FF7B72; --dangF:rgba(255,123,114,.10);
+  --voile:rgba(13,13,16,.88);
+  --ombre:0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.5);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  background:var(--fond);color:var(--texte);
+  font-family:"Inter Tight",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  font-size:15px;line-height:1.45;-webkit-font-smoothing:antialiased;
+  overscroll-behavior-y:none;
+}
+button,input,select,textarea{font:inherit;color:inherit}
+button{background:none;border:0;cursor:pointer;padding:0}
+a{color:var(--acc)}
+h1,h2,h3{font-weight:600;margin:0;letter-spacing:-.02em}
+.num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1;letter-spacing:-.015em}
+.mono{font-family:"IBM Plex Mono",ui-monospace,monospace;font-variant-numeric:tabular-nums}
+.c-ok{color:var(--ok)} .c-att{color:var(--att)} .c-dang{color:var(--dang)}
+.hide{display:none!important}
+
+/* ---------------- ossature ---------------- */
+.wrap{max-width:640px;margin:0 auto;padding:0 18px calc(var(--tab) + 28px);position:relative;z-index:1}
+header.top{position:sticky;top:0;z-index:30;background:var(--voile);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--trait);padding-top:env(safe-area-inset-top)}
+.top-in{max-width:640px;margin:0 auto;padding:11px 18px;display:flex;align-items:center;gap:10px}
+.brand{display:flex;align-items:center;gap:9px;font-weight:600;font-size:17px;letter-spacing:-.03em}
+.brand svg{display:block;border-radius:7px}
+.top-sp{flex:1}
+.ver{font-family:"IBM Plex Mono",monospace;font-size:10.5px;color:var(--gris);
+  border:1px solid var(--trait);border-radius:7px;padding:3px 7px;background:var(--fond2)}
+.ver.neuf{color:var(--acc);border-color:var(--accB);background:var(--accF)}
+/* Le sélecteur de véhicule : il dit toujours sur quelle voiture on travaille,
+   et bascule d'une touche quand il y en a plusieurs. */
+.esp{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 11px;
+  border-radius:9px;border:1px solid var(--trait);background:var(--carte);
+  font-size:13px;font-weight:500;letter-spacing:-.01em;white-space:nowrap}
+.esp:active{background:var(--fond2)}
+.esp .pl{font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.03em}
+#veh-slot{display:inline-flex;align-items:center;gap:7px}
+.iconbtn{width:36px;height:36px;border-radius:9px;display:grid;place-items:center;
+  border:1px solid var(--trait);color:var(--texte);background:var(--carte)}
+.iconbtn.on{border-color:var(--accB);background:var(--accF);color:var(--acc)}
+.iconbtn:active{background:var(--fond2)}
+.iconbtn.pri{background:var(--acc);border-color:var(--acc);color:var(--surAcc)}
+
+nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:40;background:var(--voile);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  border-top:1px solid var(--trait);padding-bottom:env(safe-area-inset-bottom)}
+.tabs-in{max-width:640px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr)}
+.tab{padding:8px 0 7px;display:flex;flex-direction:column;align-items:center;gap:3px;
+  color:var(--gris);font-size:9.5px;letter-spacing:-.01em;border-top:2px solid transparent;margin-top:-1px}
+.tab span{white-space:nowrap}
+.tab.on{color:var(--texte);border-top-color:var(--acc)}
+.tab.on svg{color:var(--acc)}
+
+/* ---------------- le kilométrage, élément signature ---------------- */
+.total{padding:26px 0 20px;border-bottom:1px solid var(--trait)}
+.total-lbl{font-size:13.5px;color:var(--gris)}
+.total-val{font-size:clamp(40px,13vw,54px);font-weight:600;letter-spacing:-.045em;
+  line-height:1.05;margin:6px 0 0;display:block}
+.total-val .u{font-size:.42em;font-weight:500;color:var(--gris);letter-spacing:0;margin-left:6px}
+.total-sub{font-size:13px;color:var(--gris);margin-top:12px;display:flex;gap:14px;flex-wrap:wrap}
+.total-sub b{font-weight:500;color:var(--texte)}
+
+/* ---------------- résultats de catalogue ---------------- */
+.reslt{display:flex;align-items:center;gap:11px;width:100%;text-align:left;
+  padding:11px 2px;border-bottom:1px solid var(--trait2)}
+.reslt .n{flex:1;min-width:0;font-size:14.5px;letter-spacing:-.01em}
+.reslt .d{display:block;font-size:11.5px;color:var(--gris2);margin-top:3px;
+  font-family:"IBM Plex Mono",monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.reslt .p{font-family:"IBM Plex Mono",monospace;font-size:12.5px;color:var(--gris);white-space:nowrap}
+.reslt:active{background:var(--fond2)}
+.etape{font-size:12.5px;color:var(--gris2);margin-bottom:12px;
+  display:flex;align-items:center;gap:7px}
+.etape b{color:var(--texte);font-weight:500}
+
+/* ---------------- jauge ---------------- */
+.bud{margin-top:14px}
+.bud-l{display:flex;align-items:baseline;gap:8px;font-size:13px;color:var(--gris)}
+.bud-l .r{margin-left:auto;font-family:"IBM Plex Mono",monospace;font-size:12px}
+.bud-b{height:6px;border-radius:4px;background:var(--trait2);overflow:hidden;margin-top:7px}
+.bud-b i{display:block;height:100%;background:var(--gris2);transition:width .25s}
+.bud-b i.ok{background:var(--ok)} .bud-b i.att{background:var(--att)} .bud-b i.dang{background:var(--dang)}
+.bud-nul{margin-top:12px;font-size:13px;color:var(--gris2)}
+.bud-nul button{color:var(--acc);text-decoration:underline;text-underline-offset:3px}
+
+/* ---------------- sections et listes ---------------- */
+.sect{margin:22px 0 8px;display:flex;align-items:center;gap:10px}
+.sect h2{font-size:15px;font-weight:600}
+.sect .cnt{font-size:12.5px;color:var(--gris2)}
+.sect .sp{flex:1}
+.op{display:flex;gap:11px;align-items:flex-start;width:100%;text-align:left;
+  padding:11px 2px;border-bottom:1px solid var(--trait2)}
+.op-ic{width:30px;height:30px;flex:0 0 30px;border-radius:8px;display:grid;place-items:center;
+  background:var(--fond2);color:var(--gris);margin-top:1px;border:1px solid var(--trait2)}
+.op-ic.dang{background:var(--dangF);color:var(--dang);border-color:transparent}
+.op-ic.att{background:var(--attF);color:var(--att);border-color:transparent}
+.op-ic.ok{background:var(--okF);color:var(--ok);border-color:transparent}
+.op-ic.acc{background:var(--accF);color:var(--acc);border-color:transparent}
+.op-mid{flex:1;min-width:0}
+.op-lib{display:block;font-size:14.5px;letter-spacing:-.01em;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.op-met{display:block;font-size:11.5px;color:var(--gris2);margin-top:2px;
+  font-family:"IBM Plex Mono",monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.op-note{display:block;font-size:11.5px;color:var(--gris);margin-top:3px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-style:italic}
+.op-mt{font-family:"IBM Plex Mono",monospace;font-size:13px;font-weight:500;white-space:nowrap;padding-top:3px;
+  color:var(--gris);text-align:right}
+.op-mt b{display:block;font-weight:500;color:var(--texte);font-size:13.5px}
+.badge{display:inline-block;font-size:10px;border:1px solid var(--trait);color:var(--gris2);
+  border-radius:5px;padding:0 4px;margin-left:6px;vertical-align:1px;font-family:"IBM Plex Mono",monospace}
+.badge.acc{color:var(--acc);border-color:var(--accB);border-style:dashed}
+.badge.dang{color:var(--dang);border-color:var(--dangF)}
+.avert{border:1px solid var(--dangF);background:var(--dangF);color:var(--dang);
+  border-radius:10px;padding:11px 12px;font-size:13px;margin:12px 0;line-height:1.5}
+.avert b{font-weight:600}
+.info{border:1px solid var(--trait);background:var(--fond2);color:var(--gris);
+  border-radius:10px;padding:11px 12px;font-size:12.5px;margin:12px 0;line-height:1.5}
+.info b{font-weight:600;color:var(--texte)}
+.vide{padding:34px 4px;color:var(--gris);font-size:14px;text-align:center;border-bottom:1px solid var(--trait2)}
+.vide b{display:block;color:var(--texte);font-weight:500;margin-bottom:5px;font-size:15px}
+.jour{font-size:11.5px;color:var(--gris2);padding:14px 2px 5px;font-family:"IBM Plex Mono",monospace;
+  border-bottom:1px solid var(--trait2);display:flex;gap:10px}
+.jour .sp{flex:1}
+
+/* ---------------- lignes de véhicule ---------------- */
+.prow{display:flex;align-items:flex-start;gap:12px;width:100%;text-align:left;
+  padding:13px 2px;border-bottom:1px solid var(--trait2)}
+.pemo{width:38px;height:38px;flex:0 0 38px;border-radius:10px;display:grid;place-items:center;
+  background:var(--fond2);border:1px solid var(--trait2);color:var(--gris)}
+.pemo.on{border-color:var(--accB);color:var(--acc);background:var(--accF)}
+.pmid{flex:1;min-width:0}
+.pname{display:block;font-weight:500;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.psub{display:block;font-size:12px;color:var(--gris2);margin-top:3px;line-height:1.45}
+.prow .pmt{text-align:right;flex:0 0 auto;padding-top:2px}
+.prow .pmt .m{font-family:"IBM Plex Mono",monospace;font-size:14px;font-weight:500;white-space:nowrap;display:block}
+.prow .pmt .r{font-size:11px;color:var(--gris2);font-family:"IBM Plex Mono",monospace;display:block;margin-top:2px}
+
+/* ---------------- plan par année ---------------- */
+.an{border-top:1px solid var(--trait);margin-top:18px;padding-top:13px}
+.an:first-of-type{border-top:0}
+.an-h{display:flex;align-items:baseline;gap:10px;margin-bottom:2px}
+.an-v{font-size:19px;font-weight:600;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.an-k{font-size:12px;color:var(--gris2);font-family:"IBM Plex Mono",monospace}
+.an-c{margin-left:auto;font-size:13px;font-family:"IBM Plex Mono",monospace;color:var(--gris)}
+.an-vide{font-size:13px;color:var(--gris2);padding:9px 2px 12px}
+.an.passe .an-v{color:var(--gris2)}
+
+/* ---------------- chips et boutons ---------------- */
+.chips{display:flex;gap:7px;overflow-x:auto;padding:2px 0;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.chips::-webkit-scrollbar{display:none}
+.chip{white-space:nowrap;font-size:12.5px;padding:6px 11px;border-radius:999px;
+  border:1px solid var(--trait);color:var(--gris);background:var(--carte)}
+.chip.on{color:var(--surAcc);background:var(--acc);border-color:var(--acc)}
+html[data-theme="sombre"] .chip.on{color:#0d0d10;background:var(--texte);border-color:var(--texte)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;
+  padding:11px 15px;border-radius:10px;border:1px solid var(--trait);background:var(--carte);
+  font-size:14px;font-weight:500;letter-spacing:-.01em}
+.btn:active{background:var(--fond2)}
+.btn.pri{background:var(--acc);border-color:var(--acc);color:var(--surAcc)}
+.btn.dang{color:var(--dang);border-color:var(--dangF)}
+.btn.mini{padding:6px 10px;font-size:12.5px;border-radius:8px}
+.btn[disabled]{opacity:.45;pointer-events:none}
+.btns{display:flex;gap:9px;flex-wrap:wrap;margin:14px 0}
+.btns.grow>*{flex:1}
+
+/* ---------------- panneau et modale ---------------- */
+#sheet:empty,#modal:empty{display:none}
+.sheet{position:fixed;inset:0;z-index:51;background:var(--fond);overflow:auto;overscroll-behavior:contain;
+  animation:mte .22s cubic-bezier(.22,.7,.3,1)}
+@keyframes mte{from{transform:translateY(14px);opacity:.4}to{transform:none;opacity:1}}
+.sheet-in{max-width:640px;margin:0 auto;padding:0 18px 40px}
+.sheet-top{position:sticky;top:0;z-index:5;background:var(--voile);backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--trait);
+  padding:calc(env(safe-area-inset-top) + 9px) 18px 9px;display:flex;align-items:center;gap:10px}
+.sheet-top .t{font-weight:600;letter-spacing:-.02em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sheet-top .sp{flex:1}
+.mdl-bg{position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.34);
+  display:flex;align-items:flex-end;justify-content:center;padding:0}
+@media(min-width:560px){.mdl-bg{align-items:center;padding:20px}}
+.mdl{background:var(--fond);width:100%;max-width:460px;border-radius:16px 16px 0 0;
+  box-shadow:var(--ombre);max-height:92vh;overflow:auto;overscroll-behavior:contain;
+  padding:18px 18px calc(18px + env(safe-area-inset-bottom));animation:mte .2s cubic-bezier(.22,.7,.3,1)}
+@media(min-width:560px){.mdl{border-radius:16px}}
+.mdl h3{font-size:17px;margin-bottom:2px}
+.mdl .sous{font-size:13px;color:var(--gris);margin-bottom:14px}
+.champ{margin:12px 0}
+.champ>label{display:block;font-size:12.5px;color:var(--gris);margin-bottom:5px}
+.duo{display:flex;gap:10px}
+.duo>*{flex:1;min-width:0}
+input[type=text],input[type=date],input[type=number],select,textarea{
+  width:100%;padding:11px 12px;border-radius:10px;border:1px solid var(--trait);
+  background:var(--carte);color:var(--texte);font-size:15px;-webkit-appearance:none;appearance:none}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4.5 6 8.5l4-4' fill='none' stroke='%2371717a' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 12px center;padding-right:32px}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--acc);outline-offset:1px;border-color:transparent}
+textarea{resize:vertical;min-height:44px;line-height:1.45;font-family:inherit}
+.mt-in{display:flex;align-items:center;gap:9px}
+.mt-in input{font-size:26px;font-weight:600;letter-spacing:-.03em;padding:12px;
+  font-variant-numeric:tabular-nums;text-align:right}
+.mt-eur{font-size:19px;color:var(--gris);font-weight:500}
+.raccourcis{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.raccourcis button{font-size:12.5px;padding:6px 10px;border-radius:8px;border:1px solid var(--trait);
+  color:var(--gris);background:var(--carte);font-family:"IBM Plex Mono",monospace}
+.aide{font-size:12px;color:var(--gris2);margin-top:6px;line-height:1.5}
+.btn.wide{width:100%}
+.mdl .lig{border-top:1px solid var(--trait2);padding:12px 0;align-items:center}
+.mdl .lig .l{display:block}
+.mdl .lig .d{display:block;font-size:12px;color:var(--gris);margin-top:2px}
+.bascule{display:flex;align-items:center;gap:11px;padding:11px 12px;border:1px solid var(--trait);
+  border-radius:10px;margin:12px 0;text-align:left;width:100%}
+.bascule .l{flex:1;min-width:0;font-size:13.5px}
+.bascule .d{display:block;font-size:12px;color:var(--gris);margin-top:2px}
+.bascule .k{width:40px;height:24px;border-radius:999px;background:var(--trait);flex:0 0 40px;position:relative;transition:background .18s}
+.bascule .k::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;
+  background:var(--fond);box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .18s}
+.bascule.on .k{background:var(--acc)}
+.bascule.on .k::after{transform:translateX(16px)}
+
+/* ---------------- blocs de réglages et de fiche ---------------- */
+.bloc{border:1px solid var(--trait);border-radius:var(--r);margin:12px 0;overflow:hidden;background:var(--carte)}
+.bloc-h{padding:13px 14px;font-weight:500;font-size:14.5px;border-bottom:1px solid var(--trait2);
+  display:flex;align-items:center;gap:9px}
+.bloc-b{padding:14px}
+.lig{display:flex;align-items:center;gap:12px;padding:10px 0;border-top:1px solid var(--trait2)}
+.lig:first-child{border-top:0;padding-top:0}
+.lig .l{flex:1;min-width:0;font-size:14px}
+.lig .d{font-size:12px;color:var(--gris);margin-top:2px}
+.lig .v{font-family:"IBM Plex Mono",monospace;font-size:13px;color:var(--gris);white-space:nowrap}
+.seg{display:inline-flex;border:1px solid var(--trait);border-radius:9px;overflow:hidden}
+.seg button{padding:7px 11px;font-size:13px;color:var(--gris);border-right:1px solid var(--trait)}
+.seg button:last-child{border-right:0}
+.seg button.on{background:var(--acc);color:var(--surAcc)}
+html[data-theme="sombre"] .seg button.on{background:var(--texte);color:#0d0d10}
+.pastilles{display:flex;gap:9px;flex-wrap:wrap;align-items:center}
+.past{width:28px;height:28px;border-radius:50%;border:2px solid transparent;position:relative}
+.past.on{box-shadow:0 0 0 2px var(--fond),0 0 0 4px var(--texte)}
+.apercu{display:flex;align-items:center;gap:10px;margin-top:16px}
+.jrn{border-top:1px solid var(--trait2);padding:12px 0}
+.jrn:first-of-type{border-top:0}
+.jrn-h{display:flex;align-items:baseline;gap:9px}
+.jrn-v{font-family:"IBM Plex Mono",monospace;font-size:12.5px;font-weight:500}
+.jrn-d{font-family:"IBM Plex Mono",monospace;font-size:10.5px;color:var(--gris2)}
+.jrn-t{font-size:13px;color:var(--gris);margin-left:auto}
+.jrn ul{margin:7px 0 0;padding-left:17px}
+.jrn li{font-size:13px;line-height:1.55;margin-bottom:3px;color:var(--gris)}
+.jrn li::marker{color:var(--acc)}
+.barre{height:6px;border-radius:4px;background:var(--trait2);overflow:hidden;margin-top:7px}
+.barre i{display:block;height:100%;background:var(--acc)}
+
+/* ---------------- cote ---------------- */
+.cote{border:1px solid var(--trait);border-radius:var(--r);padding:15px;margin:12px 0;background:var(--carte)}
+.cote-h{font-size:13px;color:var(--gris)}
+.cote-v{font-size:30px;font-weight:600;letter-spacing:-.035em;margin-top:3px;font-variant-numeric:tabular-nums}
+.cote-f{font-size:12.5px;color:var(--gris2);font-family:"IBM Plex Mono",monospace;margin-top:3px}
+.cote-d{display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;color:var(--gris);margin-top:11px;
+  border-top:1px solid var(--trait2);padding-top:11px}
+.cote-d b{display:block;color:var(--texte);font-weight:500;font-family:"IBM Plex Mono",monospace;font-size:13.5px}
+
+/* ---------------- toast ---------------- */
+.toast{position:fixed;left:50%;transform:translate(-50%,90px);bottom:calc(var(--tab) + 14px);z-index:70;
+  background:var(--texte);color:var(--fond);border-radius:11px;padding:11px 14px;font-size:13.5px;
+  display:flex;align-items:center;gap:14px;max-width:calc(100% - 28px);box-shadow:var(--ombre);
+  opacity:0;pointer-events:none;transition:transform .22s cubic-bezier(.22,.7,.3,1),opacity .22s}
+.toast.on{transform:translate(-50%,0);opacity:1}
+.toast.agir{pointer-events:auto}
+.toast-act{color:var(--fond);font-weight:600;text-decoration:underline;text-underline-offset:3px;flex:0 0 auto}
+:focus-visible{outline:2px solid var(--acc);outline-offset:2px;border-radius:6px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-in">
+    <div class="brand">
+      <svg width="22" height="22" viewBox="0 0 64 64" aria-hidden="true">
+        <rect width="64" height="64" rx="14" fill="var(--acc)"/>
+        <path d="M16 44a16 16 0 1 1 32 0M32 44 42.5 29.5" fill="none" stroke="var(--surAcc)" stroke-width="5" stroke-linecap="round"/>
+      </svg>
+      Carnet
+    </div>
+    <button class="ver" id="ver-chip" data-act="journal-ouvrir" title="Voir les nouveautés"></button>
+    <div class="top-sp"></div>
+    <span id="veh-slot"></span>
+    <button class="iconbtn pri" data-act="relever-km" aria-label="Relever le kilométrage" title="Relever le kilométrage">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+    </button>
+  </div>
+</header>
+
+<main class="wrap" id="view"></main>
+
+<nav class="tabs"><div class="tabs-in" id="tabs"></div></nav>
+
+<div id="sheet"></div>
+<div id="modal"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+/* ============================================================
+   Carnet — l'entretien, le contrôle technique et la cote de tes véhicules.
+   Un seul fichier, aucune dépendance, stockage local (IndexedDB).
+   ============================================================ */
+
+const VERSION = "1.0.0";
+const SCHEMA  = 1;
+const JOURNAL = [
+  { v:"1.0.0", d:"2026-09-13", t:"Première version", l:[
+    "Un véhicule se choisit dans un catalogue embarqué de plus de sept cents modèles du marché français, des années quatre-vingt-dix à aujourd'hui. La motorisation retenue renseigne d'un coup l'énergie, le type de distribution, son intervalle et le prix du neuf. Ce qui n'y figure pas se saisit à la main.",
+    "Le kilométrage occupe le haut de l'écran : c'est lui qui déclenche tout le reste. On le relève d'une touche, et l'application en déduit le rythme annuel.",
+    "Le plan d'entretien déroule les opérations année par année, chacune à l'échéance la plus proche entre le kilométrage et la durée — vidange, filtres, distribution, freins, pneus, fluides, et ce qui est propre au diesel, à l'hybride et à l'électrique.",
+    "Chaque intervalle se règle : le carnet du constructeur prime toujours sur les valeurs génériques, et trois régimes — normal, sévère, long life — décalent les opérations moteur d'un bloc.",
+    "Le contrôle technique se calcule depuis la dernière visite : quatre ans après la première mise en circulation, puis tous les deux ans, deux mois en cas de contre-visite.",
+    "Le carnet garde ce qui a été fait, avec la date, le kilométrage et le coût. Il en sort un total dépensé et un coût au kilomètre.",
+    "Une cote est estimée depuis le prix du neuf, l'âge, le kilométrage et l'énergie, en fourchette. Elle reste une estimation : une cote relevée ailleurs peut être saisie et prend alors le dessus.",
+    "Plusieurs véhicules cohabitent : le bouton en haut de l'écran dit lequel est affiché et passe au suivant.",
+    "Thème clair ou sombre, couleur d'accent au choix, export et import JSON, installation sur l'écran d'accueil."
+  ]}
+];
+
+/* ---------- thème et accent, lus avant tout rendu ---------- */
+const LSTHEME = "carnet.theme";
+const LSACC   = "carnet.accent";
+const THEMES  = [["clair","Clair"],["sombre","Sombre"],["auto","Système"]];
+const ACCENTS = [
+  ["#0E7490","Océan"], ["#2C3AE0","Encre"], ["#7A3FA8","Prune"],
+  ["#0F6E4A","Forêt"], ["#B3541E","Cuivre"], ["#B32455","Grenat"], ["#3F4756","Graphite"]
+];
+const media = window.matchMedia ? window.matchMedia("(prefers-color-scheme: dark)") : null;
+
+function litLS(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
+function ecritLS(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
+function themeActuel(){ return litLS(LSTHEME) || "clair"; }
+function accentActuel(){ return litLS(LSACC) || ACCENTS[0][0]; }
+
+function hexRGBA(h,a){
+  const n = parseInt(h.slice(1),16);
+  return "rgba(" + ((n>>16)&255) + "," + ((n>>8)&255) + "," + (n&255) + "," + a + ")";
+}
+/* Luminance relative : un accent clair réclame du texte noir par-dessus. */
+function surAccent(h){
+  const n = parseInt(h.slice(1),16);
+  const l = (0.299*((n>>16)&255) + 0.587*((n>>8)&255) + 0.114*(n&255)) / 255;
+  return l > .62 ? "#000000" : "#ffffff";
+}
+function appliquerAccent(h){
+  const r = document.documentElement.style;
+  r.setProperty("--acc", h);
+  r.setProperty("--accF", hexRGBA(h,.08));
+  r.setProperty("--accB", hexRGBA(h,.35));
+  r.setProperty("--surAcc", surAccent(h));
+}
+function appliquerTheme(t){
+  const sombre = t === "auto" ? !!(media && media.matches) : t === "sombre";
+  document.documentElement.setAttribute("data-theme", sombre ? "sombre" : "clair");
+  const m = document.querySelector('meta[name="theme-color"]');
+  if(m) m.setAttribute("content", sombre ? "#0d0d10" : "#ffffff");
+}
+appliquerTheme(themeActuel());
+appliquerAccent(accentActuel());
+if(media && media.addEventListener)
+  media.addEventListener("change", () => { if(themeActuel() === "auto") appliquerTheme("auto"); });
+
+/* ---------- utilitaires ---------- */
+const $ = s => document.querySelector(s);
+const p2 = n => String(n).padStart(2,"0");
+const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c =>
+  ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,8);
+const todayISO = () => { const d = new Date(); return d.getFullYear()+"-"+p2(d.getMonth()+1)+"-"+p2(d.getDate()); };
+const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
+const cap = s => String(s||"").charAt(0).toUpperCase() + String(s||"").slice(1);
+
+/* ---------- argent ----------
+   Tout est stocké en centimes entiers : additionner des flottants finit
+   toujours par produire un total à 0,000000004 près. */
+function cents(txt){
+  if(typeof txt === "number") return Math.round(txt*100);
+  const s = String(txt||"").replace(/\s|\u00a0|\u202f/g,"").replace(",",".").replace(/[^0-9.\-]/g,"");
+  const v = parseFloat(s);
+  return isNaN(v) ? 0 : Math.round(v*100);
+}
+let _nf = null, _nf0 = null;
+const MASQUE = "••••";
+const masque = () => !!DB.settings.masque;
+function fmt(c, sansMasque){
+  if(masque() && !sansMasque) return MASQUE;
+  if(!_nf) _nf = new Intl.NumberFormat("fr-FR", { style:"currency", currency:"EUR", maximumFractionDigits:2 });
+  return _nf.format((c||0)/100);
+}
+function fmtE(c, sansMasque){
+  if(masque() && !sansMasque) return MASQUE;
+  if(!_nf0) _nf0 = new Intl.NumberFormat("fr-FR", { style:"currency", currency:"EUR", maximumFractionDigits:0 });
+  return _nf0.format(Math.round((c||0)/100));
+}
+function brut(c){ return ((c||0)/100).toFixed(2).replace(".", ","); }
+function nb(n){ return new Intl.NumberFormat("fr-FR").format(Math.round(n||0)); }
+function km(n){ return nb(n) + " km"; }
+
+/* ---------- dates ---------- */
+const MOIS = ["janv","févr","mars","avr","mai","juin","juil","août","sept","oct","nov","déc"];
+const MOIS_LONG = ["janvier","février","mars","avril","mai","juin","juillet","août",
+                   "septembre","octobre","novembre","décembre"];
+function frDate(iso, avecAn){
+  if(!iso) return "";
+  const [a,m,j] = String(iso).split("-").map(Number);
+  if(!a) return "";
+  return j + " " + MOIS[(m||1)-1] + (avecAn === false ? "" : " " + a);
+}
+function frMoisAn(iso){
+  if(!iso) return "";
+  const [a,m] = String(iso).split("-").map(Number);
+  return MOIS_LONG[(m||1)-1] + " " + a;
+}
+function jrs(iso){ return Math.round(Date.parse(iso + "T12:00:00") / 86400000); }
+function entre(a,b){ return jrs(b) - jrs(a); }
+function isoPlusJours(iso, n){
+  const d = new Date(Date.parse(iso + "T12:00:00") + n*86400000);
+  return d.getFullYear()+"-"+p2(d.getMonth()+1)+"-"+p2(d.getDate());
+}
+function plusMois(iso, n){
+  const [a,m,j] = String(iso).split("-").map(Number);
+  const t = (m-1) + n;
+  const na = a + Math.floor(t/12), nm = ((t%12)+12)%12;
+  const dernier = new Date(na, nm+1, 0).getDate();
+  return na + "-" + p2(nm+1) + "-" + p2(Math.min(j, dernier));
+}
+function anneeDe(iso){ return parseInt(String(iso||"").slice(0,4), 10) || 0; }
+/* Âge en années décimales : tout le calcul de cote en dépend. */
+function ageAns(iso, ref){
+  if(!iso) return 0;
+  return Math.max(0, entre(iso, ref || todayISO()) / 365.25);
+}
+/* Une échéance se dit en jours tant qu'elle est proche, en mois ensuite :
+   « dans 47 jours » est plus parlant que « dans 1,5 mois », et « dans 3 ans »
+   plus parlant que « dans 1096 jours ». */
+function delai(iso){
+  const d = entre(todayISO(), iso);
+  const ad = Math.abs(d);
+  let t;
+  if(ad === 0) return "aujourd'hui";
+  if(ad < 45) t = ad + (ad > 1 ? " jours" : " jour");
+  else if(ad < 700) t = Math.round(ad/30.44) + " mois";
+  else t = (ad/365.25).toFixed(ad < 1800 ? 1 : 0).replace(".",",") + " ans";
+  return d < 0 ? "il y a " + t : "dans " + t;
+}
+function quand(ts){
+  if(!ts) return "jamais";
+  const d = new Date(ts);
+  return frDate(d.getFullYear()+"-"+p2(d.getMonth()+1)+"-"+p2(d.getDate())) +
+         " à " + p2(d.getHours()) + "h" + p2(d.getMinutes());
+}
+function ko(n){
+  if(n == null) return "—";
+  if(n < 1024) return n + " o";
+  if(n < 1048576) return (n/1024).toFixed(1).replace(".",",") + " ko";
+  return (n/1048576).toFixed(1).replace(".",",") + " Mo";
+}
+
+/* ---------- toast, avec son annulation ---------- */
+function toast(msg, action){
+  const t = $("#toast");
+  if(!t) return;
+  t.innerHTML = '<span>' + esc(msg) + '</span>' +
+    (action ? '<button class="toast-act" data-act="' + action + '">Annuler</button>' : "");
+  t.classList.add("on");
+  t.classList.toggle("agir", !!action);
+  clearTimeout(toast._t);
+  toast._t = setTimeout(fermerToast, action ? 7000 : 3200);
+}
+function fermerToast(){ const t = $("#toast"); if(t) t.classList.remove("on","agir"); clearTimeout(toast._t); }
+let corbeille = null;
+
+/* ---------- icônes ----------
+   Une valeur qui commence par « < » est injectée telle quelle, le reste est
+   enveloppé dans un <path>. */
+const ICONES = {
+  home:"M3 10.5 12 3l9 7.5M5.5 9V21h13V9",
+  cal:'<path d="M4 6.5h16V21H4zM4 11h16M8.5 3v4M15.5 3v4"/>',
+  livre:'<path d="M4 4.5h7.2a2.8 2.8 0 0 1 2.8 2.8V20a2 2 0 0 0-2-2H4zM20 4.5h-3.2A2.8 2.8 0 0 0 14 7.3V20a2 2 0 0 1 2-2h4z"/>',
+  voiture:'<path d="M4 14h16M6.2 14l1.6-4.6A2 2 0 0 1 9.7 8h4.6a2 2 0 0 1 1.9 1.4L17.8 14M5 14v4h2.6v-2h8.8v2H19v-4"/><path d="M7.6 16.2h.01M16.4 16.2h.01"/>',
+  cog:'<circle cx="12" cy="12" r="3.1"/><path d="M12 2.6v2.2M12 19.2v2.2M4.6 7.3l1.9 1.1M17.5 15.6l1.9 1.1M4.6 16.7l1.9-1.1M17.5 8.4l1.9-1.1"/>',
+  plus:"M12 5v14M5 12h14",
+  oeil:'<path d="M2 12s3.6-6 10-6 10 6 10 6-3.6 6-10 6-10-6-10-6z"/><circle cx="12" cy="12" r="2.6"/>',
+  oeilBarre:'<path d="M4 4l16 16M10.2 5.7A10.9 10.9 0 0 1 12 5.6c6.4 0 10 6.4 10 6.4a17.6 17.6 0 0 1-3.5 4M6.5 7.4C3.6 9.2 2 12 2 12s3.6 6.4 10 6.4a11 11 0 0 0 3.4-.5"/>',
+  chevron:"M9 5l7 7-7 7",
+  croix:"M6 6l12 12M18 6 6 18",
+  cle:"M20.4 4.4a4.6 4.6 0 0 1-6.2 6.1L6 18.7 4.2 16.9l8.2-8.2a4.6 4.6 0 0 1 6.1-6.2l-2.7 2.7 2 2z",
+  goutte:"M12 3.4s5.6 6.2 5.6 9.7a5.6 5.6 0 1 1-11.2 0C6.4 9.6 12 3.4 12 3.4z",
+  filtre:"M3.6 5h16.8l-6.6 7.6V19l-3.6 2v-8.4z",
+  frein:'<circle cx="12" cy="12" r="8.4"/><circle cx="12" cy="12" r="2.6"/>',
+  pneu:'<circle cx="12" cy="12" r="8.4"/><circle cx="12" cy="12" r="3.4"/><path d="M12 3.6v5M12 15.4v5M3.6 12h5M15.4 12h5"/>',
+  batterie:'<rect x="2.6" y="7.6" width="16.8" height="9.8" rx="2"/><path d="M6 12.5h3M7.5 11v3M14.5 12.5h3M22 11v3"/>',
+  eclair:"M13.2 2.4 5.4 13.6h5.6L10.8 21.6l7.8-11.2H13z",
+  flocon:"M12 3v18M4.2 7.5l15.6 9M19.8 7.5l-15.6 9",
+  horloge:'<circle cx="12" cy="12" r="8.4"/><path d="M12 7v5.3l3.2 2"/>',
+  check:"M4.5 12.6l5 5 10-11",
+  alerte:'<path d="M12 3.4 22 20.4H2z"/><path d="M12 9.6v4.9M12 17.3v.01"/>',
+  jauge:'<path d="M3.6 18a8.4 8.4 0 1 1 16.8 0"/><path d="M12 18l4.8-6.4"/>',
+  loupe:'<circle cx="11" cy="11" r="6.4"/><path d="M15.8 15.8 21 21"/>',
+  doc:'<path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4M9.2 12.5h5.6M9.2 16.2h5.6"/>',
+  euro:'<path d="M17.5 6.4A6.6 6.6 0 1 0 17.5 17.6M4.8 10.4h8.4M4.8 13.6h8.4"/>',
+  route:'<path d="M8.5 3 5 21M15.5 3 19 21M12 4v3M12 10.5v3M12 17v3"/>'
+};
+function icoSVG(t){
+  const acc = accentActuel();
+  return '<svg width="' + t + '" height="' + t + '" viewBox="0 0 64 64" style="border-radius:' + Math.round(t*0.22) + 'px">' +
+    '<rect width="64" height="64" rx="14" fill="' + acc + '"/>' +
+    '<path d="M16 44a16 16 0 1 1 32 0M32 44 42.5 29.5" fill="none" stroke="' + surAccent(acc) + '" ' +
+    'stroke-width="5" stroke-linecap="round"/></svg>';
+}
+function svg(n, t, sw){
+  const d = ICONES[n] || ICONES.cle;
+  const dedans = d.charAt(0) === "<" ? d : '<path d="' + d + '"/>';
+  return '<svg width="' + t + '" height="' + t + '" viewBox="0 0 24 24" fill="none" ' +
+    'stroke="currentColor" stroke-width="' + (sw || 1.7) + '" stroke-linecap="round" ' +
+    'stroke-linejoin="round" aria-hidden="true">' + dedans + '</svg>';
+}
+
+/* ============================================================
+   STOCKAGE
+   ============================================================ */
+const DEFAULTS = {
+  version:SCHEMA, vehicules:{}, actes:{},
+  settings:{ theme:"clair", accent:ACCENTS[0][0], actif:"", masque:false,
+             kmAn:13000, horizon:10, cTri:"recent" },
+  meta:{ cree:Date.now(), modifie:0, exporte:0, vue:null }
+};
+let DB = JSON.parse(JSON.stringify(DEFAULTS));
+let pret = false;
+
+const IDB = (() => {
+  const NOM = "carnet", V = 1;
+  let db = null;
+  const prom = r => new Promise((res,rej) => { r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
+  const stores = ["vehicules","actes","kv"];
+  return {
+    ouvrir(){
+      return new Promise((res,rej) => {
+        if(!window.indexedDB) return rej(new Error("IndexedDB indisponible"));
+        const r = indexedDB.open(NOM, V);
+        r.onupgradeneeded = () => {
+          const d = r.result;
+          if(!d.objectStoreNames.contains("vehicules")) d.createObjectStore("vehicules", { keyPath:"id" });
+          if(!d.objectStoreNames.contains("actes"))     d.createObjectStore("actes", { keyPath:"id" });
+          if(!d.objectStoreNames.contains("kv"))        d.createObjectStore("kv");
+        };
+        r.onsuccess = () => { db = r.result; res(db); };
+        r.onerror   = () => rej(r.error || new Error("ouverture refusée"));
+        r.onblocked = () => rej(new Error("base verrouillée par un autre onglet"));
+      });
+    },
+    async tout(){
+      const t = db.transaction(stores, "readonly");
+      const [vehicules, actes, kk, kvv] = await Promise.all([
+        prom(t.objectStore("vehicules").getAll()),
+        prom(t.objectStore("actes").getAll()),
+        prom(t.objectStore("kv").getAllKeys()),
+        prom(t.objectStore("kv").getAll())
+      ]);
+      const kv = {}; kk.forEach((k,i) => { kv[k] = kvv[i]; });
+      return { vehicules, actes, kv };
+    },
+    ecrire(lots){
+      return new Promise((res,rej) => {
+        const t = db.transaction(stores, "readwrite");
+        t.oncomplete = () => res();
+        t.onerror = () => rej(t.error);
+        t.onabort = () => rej(t.error || new Error("écriture annulée"));
+        const V_ = t.objectStore("vehicules"), A = t.objectStore("actes"), K = t.objectStore("kv");
+        (lots.vehicules||[]).forEach(x => V_.put(x));
+        (lots.supprVehicules||[]).forEach(id => V_.delete(String(id)));
+        (lots.actes||[]).forEach(x => A.put(x));
+        (lots.supprActes||[]).forEach(id => A.delete(String(id)));
+        Object.keys(lots.kv||{}).forEach(k => K.put(lots.kv[k], k));
+      });
+    },
+    vider(){
+      return new Promise((res,rej) => {
+        const t = db.transaction(stores, "readwrite");
+        t.oncomplete = () => res(); t.onerror = () => rej(t.error);
+        stores.forEach(x => t.objectStore(x).clear());
+      });
+    }
+  };
+})();
+
+/* ---------- file d'écriture ----------
+   Rien n'est écrit à chaque frappe : on marque ce qui est sale et on écoule
+   150 ms plus tard, en une seule transaction. */
+const sale = { vehicules:new Set(), supprVehicules:new Set(),
+               actes:new Set(), supprActes:new Set(), kv:false };
+let _fl;
+function planifier(interne){
+  clearTimeout(_fl); _fl = setTimeout(ecouler, 150);
+  if(!interne) DB.meta.modifie = Date.now();
+}
+async function ecouler(){
+  if(!pret) return;
+  const rien = !sale.vehicules.size && !sale.supprVehicules.size &&
+               !sale.actes.size && !sale.supprActes.size && !sale.kv;
+  if(rien) return;
+  const lots = { vehicules:[], supprVehicules:[...sale.supprVehicules],
+                 actes:[], supprActes:[...sale.supprActes], kv:{} };
+  sale.vehicules.forEach(id => { const x = DB.vehicules[id]; if(x) lots.vehicules.push(x); });
+  sale.actes.forEach(id => { const x = DB.actes[id]; if(x) lots.actes.push(x); });
+  if(sale.kv) lots.kv = { settings:DB.settings, meta:DB.meta, version:SCHEMA };
+  Object.values(sale).forEach(v => { if(v && v.clear) v.clear(); });
+  sale.kv = false;
+  try{ await IDB.ecrire(lots); }
+  catch(e){ toast("Enregistrement impossible : " + ((e && e.message) || e)); }
+}
+function sauver(interne){ sale.kv = true; planifier(interne); }
+function sauverVehicule(v){ if(v) sale.vehicules.add(String(v.id)); sale.kv = true; planifier(); }
+function sauverActe(a){ if(a) sale.actes.add(String(a.id)); sale.kv = true; planifier(); }
+function supprimerVehiculeDB(id){ delete DB.vehicules[id]; sale.supprVehicules.add(String(id)); sale.kv = true; planifier(); }
+function supprimerActeDB(id){ delete DB.actes[id]; sale.supprActes.add(String(id)); sale.kv = true; planifier(); }
+function toutSalir(){
+  Object.keys(DB.vehicules).forEach(id => sale.vehicules.add(id));
+  Object.keys(DB.actes).forEach(id => sale.actes.add(id));
+  sale.kv = true; planifier();
+}
+function assembler(k){
+  const d = JSON.parse(JSON.stringify(DEFAULTS));
+  (k.vehicules||[]).forEach(x => { d.vehicules[x.id] = x; });
+  (k.actes||[]).forEach(x => { d.actes[x.id] = x; });
+  d.settings = { ...DEFAULTS.settings, ...(k.kv.settings || {}) };
+  d.meta = { ...DEFAULTS.meta, ...(k.kv.meta || {}) };
+  return d;
+}
+/* Fusion d'une sauvegarde, jamais destructive : rien n'est écrasé, seules les
+   entrées absentes sont ajoutées. Les identifiants font foi. */
+function fusionnerSauvegarde(x){
+  if(!x || !x.vehicules) throw new Error("format inattendu");
+  let nv = 0, na = 0;
+  Object.entries(x.vehicules||{}).forEach(([k,v]) => { if(!DB.vehicules[k]){ DB.vehicules[k] = v; nv++; } });
+  Object.entries(x.actes||{}).forEach(([k,v]) => { if(!DB.actes[k]){ DB.actes[k] = v; na++; } });
+  // Une intervention rattachée à un véhicule absent ne se rattacherait à rien :
+  // on la laisse tomber plutôt que de la garder orpheline.
+  Object.values(DB.actes).forEach(a => { if(!DB.vehicules[a.vehicule]) supprimerActeDB(a.id); });
+  if(!DB.settings.actif) DB.settings.actif = Object.keys(DB.vehicules)[0] || "";
+  toutSalir();
+  return { nv, na };
+}
+
+/* ============================================================
+   MODÈLE
+   Un véhicule porte son identité, sa motorisation, la
+   date de première mise en circulation, un kilométrage daté, la dernière
+   révision complète servant de point de départ, la date du dernier contrôle
+   technique, le prix du neuf, et les intervalles qu'on a voulu corriger.
+
+   Une intervention porte l'opération qu'elle règle, sa date, le kilométrage
+   du compteur ce jour-là et son coût. Rien n'est cumulé : tous les totaux et
+   toutes les échéances se recalculent, donc rien ne peut diverger.
+   ============================================================ */
+const ENERGIES = [["essence","Essence"],["diesel","Diesel"],["hybride","Hybride"],["electrique","Électrique"]];
+const BOITES   = [["manuelle","Manuelle"],["auto","Automatique"]];
+const DISTRIBS = [["courroie","Courroie"],["chaine","Chaîne"],["inconnu","Je ne sais pas"]];
+const GENRES   = [["vp","Voiture"],["vu","Utilitaire"],["moto","Moto ou scooter"],["collection","Collection"]];
+const REGIMES  = [["normal","Normal"],["severe","Sévère"],["long","Long life"]];
+const REGIME_C = { normal:1, severe:0.7, long:1.4 };
+
+const vehicules = () => Object.values(DB.vehicules).sort((a,b) => (a.cree||0) - (b.cree||0));
+const vActif = () => DB.vehicules[DB.settings.actif] || vehicules()[0] || null;
+const actesDe = id => Object.values(DB.actes).filter(a => a.vehicule === id);
+const nomVehicule = v => !v ? "" : ((v.marque || "") + " " + (v.modele || "")).trim() || "Véhicule";
+
+/* ---------- catalogue d'entretien ----------
+   Valeurs génériques, les plus courantes en France. Le carnet du constructeur
+   prime toujours : chaque intervalle se corrige véhicule par véhicule.
+   « km » peut être un nombre ou un intervalle par énergie ; « mois » compte
+   à part, et c'est la première des deux échéances atteintes qui déclenche.
+   « reg » marque les opérations que le régime d'entretien décale. */
+const OPES = [
+  { k:"vidange", n:"Vidange moteur et filtre à huile", g:"Moteur", i:"goutte", c:120, reg:1,
+    km:{ essence:15000, diesel:20000, hybride:15000 }, mois:12, en:["essence","diesel","hybride"],
+    d:"Le premier des deux seuils atteint déclenche. Trajets courts, ville, remorquage : passer en régime sévère." },
+  { k:"bougies", n:"Bougies d'allumage", g:"Moteur", i:"eclair", c:130, reg:1,
+    km:60000, mois:48, en:["essence","hybride"],
+    d:"Les bougies iridium ou platine tiennent souvent 90 000 à 100 000 km : corriger l'intervalle si c'est le cas." },
+  { k:"distribution", n:"Distribution : courroie, galets, pompe à eau", g:"Moteur", i:"cle", c:800,
+    km:120000, mois:72, en:["essence","diesel","hybride"],
+    d:"L'intervalle varie énormément d'un moteur à l'autre, de 60 000 à 240 000 km. À relever dans le carnet : une rupture détruit le moteur. Les moteurs à chaîne n'ont pas cette ligne." },
+  { k:"accessoire", n:"Courroie d'accessoires", g:"Moteur", i:"cle", c:220,
+    km:100000, mois:72, en:["essence","diesel","hybride"],
+    d:"Elle entraîne l'alternateur, la direction assistée et la climatisation. Elle se change souvent avec la distribution." },
+  { k:"fap", n:"Contrôle du filtre à particules", g:"Moteur", i:"cle", c:60,
+    km:80000, mois:0, en:["diesel"],
+    d:"Un FAP colmaté se voit à l'usage : régénérations rapprochées, perte de puissance, voyant moteur." },
+  { k:"adblue", n:"Appoint AdBlue", g:"Moteur", i:"goutte", c:30,
+    km:15000, mois:0, en:["diesel"],
+    d:"Sur les diesels SCR, à partir de 2015 environ. La consommation tourne autour d'un litre et demi pour 1 000 km." },
+  { k:"fair", n:"Filtre à air moteur", g:"Filtration", i:"filtre", c:45, reg:1,
+    km:{ essence:30000, diesel:40000, hybride:30000 }, mois:24, en:["essence","diesel","hybride"],
+    d:"Un filtre encrassé fait monter la consommation bien avant de faire tousser le moteur." },
+  { k:"fhabitacle", n:"Filtre d'habitacle", g:"Filtration", i:"filtre", c:45, reg:1,
+    km:15000, mois:12,
+    d:"Pollens et particules. Il se change en général avec la vidange, et à part sur les électriques." },
+  { k:"fcarb", n:"Filtre à carburant", g:"Filtration", i:"filtre", c:75, reg:1,
+    km:40000, mois:24, en:["diesel"],
+    d:"Propre au diesel. Sur essence, le filtre est le plus souvent monté à vie dans le réservoir." },
+  { k:"frein_liq", n:"Liquide de frein", g:"Fluides", i:"goutte", c:75, km:0, mois:24,
+    d:"Il absorbe l'humidité de l'air et perd son point d'ébullition. Deux ans, quel que soit le kilométrage." },
+  { k:"refroid", n:"Liquide de refroidissement", g:"Fluides", i:"goutte", c:110,
+    km:{ essence:90000, diesel:90000, hybride:90000, electrique:0 }, mois:60,
+    d:"Sur électrique, c'est le circuit qui tempère la batterie et l'électronique de puissance." },
+  { k:"clim", n:"Entretien de la climatisation", g:"Fluides", i:"flocon", c:95, km:0, mois:24,
+    d:"Le circuit perd naturellement un peu de gaz chaque année. Assainissement de l'évaporateur au passage." },
+  { k:"bva", n:"Vidange de boîte automatique", g:"Transmission", i:"cle", c:320, km:60000, mois:60,
+    en:["essence","diesel","hybride"],
+    d:"Certains constructeurs l'annoncent à vie ; l'usage montre qu'une vidange vers 60 000 à 80 000 km allonge nettement la boîte." },
+  { k:"embrayage", n:"Contrôle de l'embrayage", g:"Transmission", i:"cle", c:90, km:150000, mois:0,
+    d:"Pas une pièce d'entretien : une pièce d'usure, très dépendante de la conduite." },
+  { k:"reducteur", n:"Huile du réducteur", g:"Transmission", i:"cle", c:160, km:100000, mois:0, en:["electrique"],
+    d:"Une électrique n'a qu'un rapport, mais le réducteur a une huile." },
+  { k:"plaq_av", n:"Plaquettes de frein avant", g:"Freinage", i:"frein", c:190,
+    km:{ essence:40000, diesel:40000, hybride:50000, electrique:60000 }, mois:0,
+    d:"Le freinage régénératif des hybrides et des électriques ménage beaucoup les plaquettes — et fait rouiller les disques." },
+  { k:"plaq_ar", n:"Plaquettes de frein arrière", g:"Freinage", i:"frein", c:170, km:60000, mois:0 },
+  { k:"disq_av", n:"Disques de frein avant", g:"Freinage", i:"frein", c:380, km:80000, mois:0,
+    d:"En général un disque pour deux jeux de plaquettes." },
+  { k:"pneus", n:"Pneumatiques", g:"Roulement", i:"pneu", c:520, km:40000, mois:72,
+    d:"La gomme durcit avec l'âge : un train de plus de six ans se remplace même s'il lui reste du dessin." },
+  { k:"geo", n:"Géométrie et parallélisme", g:"Roulement", i:"pneu", c:80, km:30000, mois:0,
+    d:"À contrôler après un trottoir pris de travers, un nid-de-poule franc ou une usure de pneu asymétrique." },
+  { k:"amort", n:"Contrôle des amortisseurs", g:"Roulement", i:"pneu", c:60, km:80000, mois:0 },
+  { k:"batt12", n:"Batterie 12 V", g:"Électricité", i:"batterie", c:170, km:0, mois:60,
+    d:"Quatre à six ans en usage normal. Les électriques en ont une aussi, et elle lâche de la même façon." },
+  { k:"batt_ht", n:"Contrôle de la batterie de traction", g:"Électricité", i:"eclair", c:90, km:0, mois:12,
+    en:["hybride","electrique"],
+    d:"Un état de santé relevé tous les ans documente la batterie et compte à la revente." },
+  { k:"essuie", n:"Balais d'essuie-glace", g:"Divers", i:"goutte", c:45, km:0, mois:12 }
+];
+const GROUPES = ["Moteur","Filtration","Fluides","Transmission","Freinage","Roulement","Électricité","Divers"];
+const OPE = k => OPES.filter(o => o.k === k)[0] || null;
+
+/* ---------- ce qui s'applique, et à quel rythme ---------- */
+function applicable(o, v){
+  if(o.en && o.en.indexOf(v.energie) < 0) return false;
+  if(o.k === "distribution" && v.distrib === "chaine") return false;
+  if(o.k === "bva" && v.boite !== "auto") return false;
+  if(o.k === "embrayage" && v.boite !== "manuelle") return false;
+  if(o.k === "adblue" && anneeDe(v.mec) < 2015) return false;
+  const ov = (v.plan || {})[o.k];
+  if(ov && ov.off) return false;
+  return true;
+}
+function opesDe(v){ return v ? OPES.filter(o => applicable(o, v)) : []; }
+function coefRegime(v){ return REGIME_C[v.regime] || 1; }
+function interKm(o, v){
+  const ov = (v.plan || {})[o.k];
+  if(ov && ov.km != null && ov.km !== "") return Math.max(0, parseInt(ov.km,10) || 0);
+  let base = (o.km && typeof o.km === "object") ? (o.km[v.energie] || 0) : (o.km || 0);
+  if(base && o.reg) base = Math.round(base * coefRegime(v) / 500) * 500;
+  return base;
+}
+function interMois(o, v){
+  const ov = (v.plan || {})[o.k];
+  if(ov && ov.mois != null && ov.mois !== "") return Math.max(0, parseInt(ov.mois,10) || 0);
+  let base = o.mois || 0;
+  if(base && o.reg) base = Math.max(6, Math.round(base * coefRegime(v)));
+  return base;
+}
+function libelleInter(o, v){
+  const k = interKm(o, v), m = interMois(o, v);
+  if(k && m) return nb(k) + " km ou " + libMois(m);
+  if(k) return nb(k) + " km";
+  if(m) return libMois(m);
+  return "sans échéance";
+}
+function libMois(m){
+  if(!m) return "";
+  if(m % 12 === 0) return (m/12) + (m/12 > 1 ? " ans" : " an");
+  return m + " mois";
+}
+
+/* ---------- kilométrage ----------
+   Le rythme annuel est la charnière du plan : sans lui, aucune échéance
+   kilométrique ne peut être datée. Saisi à la main s'il est connu, déduit du
+   compteur et de l'âge sinon, et à défaut la moyenne française. */
+function kmAn(v){
+  if(!v) return DB.settings.kmAn || 13000;
+  if(v.kmAn > 0) return v.kmAn;
+  const a = ageAns(v.mec, v.kmDate || todayISO());
+  if(a > 0.5 && v.km > 0) return Math.max(1000, Math.round(v.km / a / 100) * 100);
+  return DB.settings.kmAn || 13000;
+}
+function kmAuJour(v, iso){
+  const j = entre(v.kmDate || todayISO(), iso);
+  return Math.max(0, Math.round((v.km || 0) + kmAn(v) * j / 365.25));
+}
+function kmAujourdhui(v){ return kmAuJour(v, todayISO()); }
+function dateAuKm(v, cible){
+  const d = (cible - (v.km || 0)) / (kmAn(v) || 1) * 365.25;
+  return isoPlusJours(v.kmDate || todayISO(), Math.round(d));
+}
+
+/* ---------- point de départ d'une opération ----------
+   La dernière intervention de ce type si elle existe ; sinon la dernière
+   révision complète déclarée ; sinon la mise en circulation, compteur à zéro. */
+function dernierActe(v, k){
+  return actesDe(v.id).filter(a => a.ope === k)
+    .sort((a,b) => a.date < b.date ? 1 : a.date > b.date ? -1 : 0)[0] || null;
+}
+function depart(v, k){
+  const a = dernierActe(v, k);
+  if(a) return { date:a.date, km:a.km || 0, source:"acte" };
+  if(v.revDate) return { date:v.revDate, km:v.revKm || 0, source:"revision" };
+  return { date:v.mec || v.cree || todayISO(), km:0, source:"mec" };
+}
+function sansRepere(v){ return !v.revDate && !actesDe(v.id).length; }
+
+/* ---------- échéance d'une opération ---------- */
+function echeance(v, o){
+  const b = depart(v, o.k);
+  const ik = interKm(o, v), im = interMois(o, v);
+  const dueKm   = ik ? b.km + ik : null;
+  const dueDate = im ? plusMois(b.date, im) : null;
+  const dateKm  = dueKm != null ? dateAuKm(v, dueKm) : null;
+  let date = null, par = "";
+  if(dateKm && dueDate){ if(dateKm <= dueDate){ date = dateKm; par = "km"; } else { date = dueDate; par = "date"; } }
+  else if(dateKm){ date = dateKm; par = "km"; }
+  else if(dueDate){ date = dueDate; par = "date"; }
+  const resteKm = dueKm != null ? dueKm - kmAujourdhui(v) : null;
+  const resteJ  = date ? entre(todayISO(), date) : null;
+  let etat = "ok";
+  if((resteKm != null && resteKm <= 0) || (dueDate && dueDate < todayISO())) etat = "depasse";
+  else if((resteKm != null && resteKm <= 1500) || (resteJ != null && resteJ <= 45)) etat = "proche";
+  return { o, b, ik, im, dueKm, dueDate, date, par, resteKm, resteJ, etat };
+}
+function echeances(v){
+  if(!v) return [];
+  return opesDe(v).map(o => echeance(v, o))
+    .sort((a,b) => (a.date || "9999") < (b.date || "9999") ? -1 : 1);
+}
+const RANG = { depasse:0, proche:1, ok:2 };
+const CLET = { depasse:"c-dang", proche:"c-att", ok:"" };
+const ICET = { depasse:"dang", proche:"att", ok:"" };
+
+/* ---------- projection année par année ----------
+   Chaque occurrence repart de la précédente : une vidange faite en retard
+   décale toutes les suivantes, comme dans la vraie vie. */
+function occurrences(v, o, finISO){
+  const res = [];
+  let b = depart(v, o.k);
+  const ik = interKm(o, v), im = interMois(o, v);
+  if(!ik && !im) return res;
+  for(let i = 0; i < 60; i++){
+    const dueKm = ik ? b.km + ik : null;
+    const dueDate = im ? plusMois(b.date, im) : null;
+    const dateKm = dueKm != null ? dateAuKm(v, dueKm) : null;
+    let date, par;
+    if(dateKm && dueDate){ if(dateKm <= dueDate){ date = dateKm; par = "km"; } else { date = dueDate; par = "date"; } }
+    else if(dateKm){ date = dateKm; par = "km"; }
+    else { date = dueDate; par = "date"; }
+    if(!date) break;
+    const kmLa = Math.max(kmAuJour(v, date), b.km);
+    res.push({ ope:o, date, km:kmLa, par, passe:date < todayISO() });
+    b = { date, km:kmLa };
+    if(date > finISO) break;
+  }
+  return res.filter(x => x.date <= finISO);
+}
+/* Le plan : toutes les occurrences de toutes les opérations, plus les
+   contrôles techniques, rangées par année civile. */
+function plan(v, ans){
+  const anCour = new Date().getFullYear();
+  const finISO = (anCour + ans) + "-12-31";
+  let tout = [];
+  opesDe(v).forEach(o => { tout = tout.concat(occurrences(v, o, finISO)); });
+  ctOccurrences(v, finISO).forEach(x => tout.push(x));
+  const par = {};
+  for(let a = anCour; a <= anCour + ans; a++) par[a] = [];
+  tout.forEach(x => {
+    const a = Math.max(anCour, anneeDe(x.date));
+    if(par[a]) par[a].push(x);
+  });
+  Object.keys(par).forEach(a => par[a].sort((x,y) => x.date < y.date ? -1 : x.date > y.date ? 1 : 0));
+  return { anCour, ans, par };
+}
+
+/* ---------- contrôle technique ----------
+   Voiture particulière : premier contrôle dans les six mois qui précèdent le
+   quatrième anniversaire, puis tous les deux ans. Utilitaire, même rythme,
+   avec une visite complémentaire antipollution chaque année entre deux.
+   Moto et scooter : premier à cinq ans, puis tous les trois ans. Véhicule de
+   collection de plus de trente ans : tous les cinq ans. Contre-visite : deux
+   mois pour repasser. */
+function ctPeriodeMois(v){
+  if(v.genre === "moto") return 36;
+  if(v.genre === "collection") return 60;
+  return 24;
+}
+function ctPremierMois(v){ return v.genre === "moto" ? 60 : 48; }
+function ctProchain(v){
+  if(!v) return null;
+  if(v.ctDernier){
+    if(v.ctResultat === "contre"){
+      return { date:plusMois(v.ctDernier, 2), premier:false, contre:true };
+    }
+    return { date:plusMois(v.ctDernier, ctPeriodeMois(v)), premier:false, contre:false };
+  }
+  if(!v.mec) return null;
+  return { date:plusMois(v.mec, ctPremierMois(v)), premier:true, contre:false };
+}
+function ctOccurrences(v, finISO){
+  const res = [];
+  let p = ctProchain(v);
+  if(!p) return res;
+  let d = p.date, premier = p.premier, contre = p.contre;
+  for(let i = 0; i < 40; i++){
+    if(d > finISO) break;
+    res.push({ ope:{ k:"ct", n: contre ? "Contre-visite" : (premier ? "Premier contrôle technique" : "Contrôle technique"),
+                     g:"Contrôle", i:"doc", c:90 },
+               date:d, km:kmAuJour(v, d), par:"date", passe:d < todayISO(), ct:true });
+    d = plusMois(d, ctPeriodeMois(v)); premier = false; contre = false;
+  }
+  return res;
+}
+function ctEtat(v){
+  const p = ctProchain(v);
+  if(!p) return null;
+  const j = entre(todayISO(), p.date);
+  const etat = j < 0 ? "depasse" : j <= 60 ? "proche" : "ok";
+  // Un contrôle passé trop tôt raccourcit le cycle : la date de la visite
+  // devient le nouveau point de départ.
+  const ouverture = p.premier ? plusMois(p.date, -6) : null;
+  return { ...p, jours:j, etat, ouverture };
+}
+
+/* ---------- cote ----------
+   Une estimation, pas une cote officielle : la décote moyenne d'un véhicule
+   particulier en France, corrigée du kilométrage réel et de l'énergie. Une
+   cote relevée ailleurs, saisie à la main, prend toujours le dessus. */
+const RESIDUEL = [1,.77,.66,.575,.505,.45,.40,.355,.315,.28,.25,.225,.203,.184,.167,
+                  .152,.14,.129,.12,.112,.105,.10,.095,.091,.087,.084];
+const COEF_ENERGIE = { essence:1, diesel:.93, hybride:1.04, electrique:.84 };
+function residuel(a){
+  if(a <= 0) return 1;
+  if(a >= RESIDUEL.length - 1) return Math.max(.06, RESIDUEL[RESIDUEL.length-1] - (a - RESIDUEL.length + 1) * .002);
+  const i = Math.floor(a), f = a - i;
+  return RESIDUEL[i] + (RESIDUEL[i+1] - RESIDUEL[i]) * f;
+}
+function cote(v){
+  if(!v) return null;
+  if(v.coteMan > 0){
+    return { val:v.coteMan, bas:Math.round(v.coteMan*.94), haut:Math.round(v.coteMan*1.06),
+             manuelle:true, age:ageAns(v.mec), decote:v.prixNeuf ? v.prixNeuf - v.coteMan : 0 };
+  }
+  if(!v.prixNeuf || !v.mec) return null;
+  const age = ageAns(v.mec);
+  const r = residuel(age);
+  const attendu = age * (DB.settings.kmAn || 13000);
+  const ecart = kmAujourdhui(v) - attendu;
+  // Huit dixièmes de pour cent par millier de kilomètres d'écart, borné :
+  // au-delà, ce n'est plus le compteur qui fait le prix.
+  const aj = clamp(-ecart / 1000 * 0.008, -0.28, 0.18);
+  const ce = COEF_ENERGIE[v.energie] || 1;
+  const cb = v.boite === "auto" ? 1.03 : 1;
+  let val = v.prixNeuf * r * (1 + aj) * ce * cb;
+  val = Math.max(val, 70000); // plancher : un véhicule roulant vaut toujours quelque chose
+  val = Math.round(val / 5000) * 5000;
+  return { val, bas:Math.round(val*.89/5000)*5000, haut:Math.round(val*1.11/5000)*5000,
+           manuelle:false, age, r, ecart, attendu, decote:v.prixNeuf - val };
+}
+/* Coût de détention : ce que le véhicule a coûté par kilomètre parcouru,
+   entretien seul ou décote comprise. */
+function coutEntretien(v){ return actesDe(v.id).reduce((s,a) => s + (a.cout||0), 0); }
+
+/* ============================================================
+   CATALOGUE
+   Marques, modèles et motorisations du marché français. Il sert à préremplir
+   l'énergie, le type de distribution, l'intervalle de distribution et le prix
+   du neuf — les quatre données qui pilotent le plan et la cote. Tout reste
+   modifiable ensuite : le catalogue propose, il ne décide pas.
+
+   Une motorisation s'écrit  nom|énergie|distribution|km|mois|prix
+     énergie       E essence · D diesel · H hybride · L électrique
+     distribution  C courroie · N chaîne · - sans objet
+     km            intervalle de distribution en milliers de kilomètres
+     mois          intervalle de distribution en mois
+     prix          prix du neuf indicatif au lancement, en milliers d'euros
+   Un modèle s'écrit  [première année, dernière année (0 si toujours vendu),
+   [motorisations]].
+   ============================================================ */
+const CAT = {
+"Abarth":{
+ "500e":[2023,0,["Abarth 500e 155|L|-|||39.5"]],
+ "595 / 695":[2008,0,["1.4 T-Jet 145|E|N|||22.5","1.4 T-Jet 180|E|N|||28.5"]],
+ "Punto Evo":[2010,2014,["1.4 T-Jet 165|E|N|||21.5"]]
+},
+"Aixam":{
+ "City / Crossline":[2010,0,["Diesel 6 kW|D|C|60|60|13.5","e-City 8 kW|L|-|||16.5"]],
+ "Coupé":[2012,0,["Diesel 6 kW|D|C|60|60|15.5"]]
+},
+"Alfa Romeo":{
+ "147":[2000,2010,["1.6 TS 120|E|C|120|72|19.5","1.9 JTD 120|D|C|180|120|21.5"]],
+ "156":[1997,2007,["1.8 TS 140|E|C|120|72|22.5","1.9 JTD 115|D|C|180|120|24.5"]],
+ "159":[2005,2011,["1.9 JTDm 150|D|C|180|120|27.5","2.0 JTDm 170|D|C|180|120|30.5"]],
+ "Brera / Spider":[2005,2010,["2.4 JTDm 210|D|C|180|120|38.5"]],
+ "Giulia":[2016,0,["2.2 JTDm 190|D|N|||44.5","2.0 Turbo 200|E|N|||45.5"]],
+ "Giulietta":[2010,2020,["1.4 TB MultiAir 170|E|C|120|72|26.5","2.0 JTDm 150|D|C|180|120|28.5"]],
+ "GT":[2003,2010,["1.9 JTD 150|D|C|180|120|25.5","2.0 JTS 165|E|C|120|72|26.5"]],
+ "Junior":[2024,0,["1.2 Hybrid 136|H|C|100|72|31.5","Junior Elettrica 156|L|-|||39.5"]],
+ "MiTo":[2008,2018,["1.4 MultiAir 135|E|C|120|72|20.5","1.3 JTDm 95|D|N|||21.5"]],
+ "Stelvio":[2017,0,["2.2 JTDm 190|D|N|||52.5","2.0 Turbo 280|E|N|||58.5"]],
+ "Tonale":[2022,0,["1.5 Hybrid 160|H|N|||38.5","Plug-in Hybrid Q4 280|H|N|||52.5"]]
+},
+"Alpine":{
+ "A110":[2017,0,["1.8 Turbo 252|E|N|||59.5","1.8 Turbo 300|E|N|||71.5"]],
+ "A290":[2024,0,["A290 220|L|-|||38.5"]],
+ "A610":[1991,1995,["3.0 V6 Turbo 250|E|C|120|72|45.0"]]
+},
+"Audi":{
+ "A1 I":[2010,2018,["1.2 TFSI 86|E|C|180|84|19.5","1.4 TFSI 122|E|C|180|84|23.5","1.6 TDI 90|D|C|180|96|22.5"]],
+ "A1 II":[2018,0,["25 TFSI 95|E|C|180|84|24.5","30 TFSI 110|E|C|180|84|27.5","35 TFSI 150|E|C|180|84|31.5"]],
+ "A2":[1999,2005,["1.4 75|E|C|120|72|17.5","1.4 TDI 90|D|C|180|96|19.5"]],
+ "A3 8L":[1996,2003,["1.6 102|E|C|120|72|20.5","1.9 TDI 110|D|C|120|96|22.5"]],
+ "A3 8P":[2003,2012,["1.6 102|E|C|180|84|22.5","2.0 TDI 140|D|C|180|96|27.5"]],
+ "A3 8V":[2012,2020,["1.4 TFSI 125|E|C|180|84|28.5","2.0 TDI 150|D|C|180|96|32.5","1.6 TDI 110|D|C|180|96|29.5"]],
+ "A3 8Y":[2020,0,["30 TFSI 110|E|C|180|84|31.5","35 TFSI 150|E|C|180|84|35.5","35 TDI 150|D|C|180|96|37.5"]],
+ "A4 Allroad":[2009,0,["2.0 TDI 190|D|C|180|96|48.5","40 TDI 204|D|C|180|96|52.5"]],
+ "A4 B6":[2000,2005,["1.9 TDI 130|D|C|120|96|28.5","2.0 130|E|C|120|72|29.5"]],
+ "A4 B7":[2004,2008,["2.0 TDI 140|D|C|180|96|31.5","2.0 TFSI 200|E|N|||34.5"]],
+ "A4 B8":[2007,2015,["2.0 TDI 143|D|C|180|96|33.5","1.8 TFSI 170|E|N|||34.5"]],
+ "A4 B9":[2015,0,["35 TFSI 150|E|C|180|84|39.5","35 TDI 163|D|C|180|96|42.5","40 TDI 190|D|C|180|96|46.5"]],
+ "A5":[2007,0,["2.0 TDI 190|D|C|180|96|45.5","40 TFSI 204|E|C|180|84|48.5"]],
+ "A5 Sportback":[2009,0,["2.0 TDI 190|D|C|180|96|46.5","40 TFSI 204|E|C|180|84|48.5"]],
+ "A6 C6":[2004,2011,["2.0 TDI 140|D|C|180|96|42.5","3.0 TDI 233|D|N|||55.5"]],
+ "A6 C7":[2011,2018,["2.0 TDI 190|D|C|180|96|48.5","3.0 TDI 272|D|N|||62.5"]],
+ "A6 C8":[2018,0,["40 TDI 204|D|C|180|96|56.5","45 TFSI 265|E|N|||62.5"]],
+ "A7":[2010,0,["3.0 TDI 245|D|N|||68.5","45 TFSI 265|E|N|||72.5"]],
+ "A8":[2002,0,["3.0 TDI 250|D|N|||95.5","50 TDI 286|D|N|||105.5"]],
+ "e-tron / Q8 e-tron":[2019,0,["55 quattro 408|L|-|||82.5"]],
+ "e-tron GT":[2021,0,["e-tron GT 476|L|-|||105.5"]],
+ "Q2":[2016,0,["30 TFSI 110|E|C|180|84|29.5","35 TFSI 150|E|C|180|84|34.5","30 TDI 116|D|C|180|96|33.5"]],
+ "Q3 I":[2011,2018,["2.0 TDI 150|D|C|180|96|34.5","1.4 TFSI 150|E|C|180|84|33.5"]],
+ "Q3 II":[2018,0,["35 TFSI 150|E|C|180|84|39.5","35 TDI 150|D|C|180|96|42.5"]],
+ "Q3 Sportback":[2019,0,["35 TFSI 150|E|C|180|84|42.5","35 TDI 150|D|C|180|96|44.5"]],
+ "Q4 e-tron":[2021,0,["40 204|L|-|||48.5","45 286|L|-|||53.5"]],
+ "Q5":[2008,0,["2.0 TDI 190|D|C|180|96|49.5","40 TDI 204|D|C|180|96|56.5"]],
+ "Q6 e-tron":[2024,0,["Q6 e-tron 285|L|-|||74.5"]],
+ "Q7":[2005,0,["3.0 TDI 249|D|N|||72.5"]],
+ "Q8":[2018,0,["50 TDI 286|D|N|||88.5","55 TFSI 340|E|N|||92.5"]],
+ "TT":[1998,2023,["1.8 T 180|E|C|120|72|33.5","2.0 TFSI 200|E|N|||38.5","2.0 TDI 184|D|C|180|96|42.5"]]
+},
+"BMW":{
+ "i3":[2013,2022,["i3 170|L|-|||39.5","i3s 184|L|-|||44.5"]],
+ "i4":[2021,0,["eDrive40 340|L|-|||62.5"]],
+ "iX":[2021,0,["iX xDrive40 326|L|-|||84.5","iX xDrive50 523|L|-|||102.5"]],
+ "iX3":[2020,0,["iX3 286|L|-|||72.5"]],
+ "Série 1 E87":[2004,2011,["116i 122|E|N|||24.5","118d 143|D|N|||28.5","120d 177|D|N|||31.5"]],
+ "Série 1 F20":[2011,2019,["116d 116|D|N|||27.5","118i 136|E|N|||29.5","120d 190|D|N|||34.5"]],
+ "Série 1 F40":[2019,0,["118i 140|E|N|||32.5","116d 116|D|N|||33.5","120d 190|D|N|||41.5"]],
+ "Série 2 Active Tourer":[2014,0,["216d 116|D|N|||31.5","218i 136|E|N|||32.5"]],
+ "Série 2 Coupé":[2014,0,["220d 190|D|N|||42.5","220i 184|E|N|||41.5"]],
+ "Série 2 Gran Coupé":[2020,0,["218i 140|E|N|||35.5","218d 150|D|N|||37.5"]],
+ "Série 2 Gran Tourer":[2015,2022,["216d 116|D|N|||33.5","218i 140|E|N|||34.5"]],
+ "Série 3 E46":[1998,2006,["318i 143|E|N|||30.5","320d 150|D|N|||33.5"]],
+ "Série 3 E90":[2005,2012,["318d 143|D|N|||33.5","320d 177|D|N|||36.5","320i 170|E|N|||35.5"]],
+ "Série 3 F30":[2012,2019,["318d 150|D|N|||36.5","320d 190|D|N|||40.5","320i 184|E|N|||39.5"]],
+ "Série 3 G20":[2019,0,["318d 150|D|N|||44.5","320d 190|D|N|||48.5","330e 292|H|N|||53.5"]],
+ "Série 4":[2013,0,["420d 190|D|N|||48.5","420i 184|E|N|||47.5"]],
+ "Série 5 E60":[2003,2010,["520d 163|D|N|||44.5","530d 231|D|N|||55.5"]],
+ "Série 5 F10":[2010,2017,["520d 184|D|N|||49.5","530d 258|D|N|||62.5"]],
+ "Série 5 G30":[2017,2023,["520d 190|D|N|||53.5","530e 292|H|N|||62.5"]],
+ "Série 5 G60":[2023,0,["520d 197|D|N|||62.5","i5 eDrive40 340|L|-|||72.5"]],
+ "Série 6":[2003,2018,["640d 313|D|N|||82.5","640i 320|E|N|||85.5"]],
+ "Série 7":[2008,0,["730d 265|D|N|||98.5","740d 340|D|N|||115.5"]],
+ "X1 F48":[2015,2022,["18d 150|D|N|||36.5","20d 190|D|N|||43.5","18i 140|E|N|||35.5"]],
+ "X1 U11":[2022,0,["sDrive18i 136|E|N|||43.5","iX1 313|L|-|||55.5"]],
+ "X2":[2018,0,["18d 150|D|N|||39.5","20i 192|E|N|||43.5"]],
+ "X2 U10":[2024,0,["sDrive20i 170|E|N|||46.5","iX2 313|L|-|||57.5"]],
+ "X3 E83/F25":[2004,2017,["20d 184|D|N|||45.5","30d 258|D|N|||58.5"]],
+ "X3 G01":[2017,0,["20d 190|D|N|||52.5","30e 292|H|N|||62.5"]],
+ "X4":[2014,0,["20d 190|D|N|||56.5","30i 252|E|N|||58.5"]],
+ "X5":[2007,0,["30d 265|D|N|||78.5","45e 394|H|N|||88.5"]],
+ "X5 G05":[2018,0,["30d 286|D|N|||82.5","45e 394|H|N|||92.5"]],
+ "X6":[2008,0,["30d 286|D|N|||88.5","40i 340|E|N|||92.5"]],
+ "X7":[2019,0,["40d 340|D|N|||115.5"]],
+ "Z4":[2002,0,["20i 197|E|N|||48.5","30i 258|E|N|||58.5"]]
+},
+"BYD":{
+ "Atto 3":[2022,0,["Atto 3 204|L|-|||38.5"]],
+ "Dolphin":[2023,0,["Dolphin 204|L|-|||30.5"]],
+ "Dolphin Surf":[2025,0,["Dolphin Surf 88|L|-|||19.9"]],
+ "Han":[2022,0,["Han EV 517|L|-|||72.5"]],
+ "Seal":[2023,0,["Seal Design 313|L|-|||46.5"]],
+ "Seal U":[2024,0,["Seal U DM-i 218|H|N|||39.5","Seal U EV 218|L|-|||42.5"]],
+ "Sealion 7":[2025,0,["Sealion 7 313|L|-|||45.5"]],
+ "Tang":[2022,0,["Tang EV 517|L|-|||72.5"]]
+},
+"Chevrolet":{
+ "Aveo":[2006,2015,["1.2 86|E|C|120|72|12.5","1.3 VCDi 95|D|N|||15.5"]],
+ "Captiva":[2006,2015,["2.0 VCDi 150|D|N|||29.5","2.2 VCDi 184|D|N|||33.5"]],
+ "Cruze":[2009,2015,["1.7 VCDi 131|D|N|||21.5","1.6 16v 124|E|C|120|72|19.5"]],
+ "Matiz / Spark":[1998,2015,["1.0 68|E|C|120|72|9.5","1.2 82|E|C|120|72|11.5"]],
+ "Orlando":[2011,2015,["2.0 VCDi 163|D|N|||26.5"]]
+},
+"Chrysler":{
+ "300C":[2004,2011,["3.0 CRD 218|D|N|||45.5"]],
+ "PT Cruiser":[2000,2010,["2.2 CRD 150|D|C|180|120|24.5"]],
+ "Voyager / Grand Voyager":[1996,2015,["2.8 CRD 163|D|N|||38.5"]]
+},
+"Citroën":{
+ "Ami":[2020,0,["Ami 6 kW|L|-|||7.4"]],
+ "Berlingo":[2008,0,["1.6 HDi 92|D|C|180|120|19.5","1.5 BlueHDi 130|D|C|180|120|26.5","ë-Berlingo 136|L|-|||36.5"]],
+ "Berlingo I":[1996,2008,["1.6 16v 110|E|C|120|72|15.5","1.6 HDi 92|D|C|180|120|17.5"]],
+ "C-Crosser":[2007,2012,["2.2 HDi 156|D|C|180|120|32.5"]],
+ "C-Elysée":[2012,2022,["1.2 PureTech 82|E|C|100|72|14.5","1.6 BlueHDi 100|D|C|180|120|16.5"]],
+ "C-Zero":[2010,2020,["C-Zero 67|L|-|||29.5"]],
+ "C1":[2005,2022,["1.0 VTi 68|E|N|||10.5","1.2 PureTech 82|E|C|100|72|14.5"]],
+ "C2":[2003,2009,["1.1 60|E|C|120|72|11.5","1.4 HDi 70|D|C|180|120|13.5"]],
+ "C3 Aircross I":[2017,2024,["1.2 PureTech 110|E|C|100|72|21.5","1.5 BlueHDi 110|D|C|180|120|24.5"]],
+ "C3 I":[2002,2009,["1.4 75|E|C|120|72|13.5","1.6 16v 110|E|C|120|72|15.5","1.4 HDi 70|D|C|180|120|15.9"]],
+ "C3 II":[2009,2016,["1.2 PureTech 82|E|C|100|72|15.5","1.6 HDi 92|D|C|180|120|18.5"]],
+ "C3 III":[2016,2024,["1.2 PureTech 83|E|C|100|72|16.5","1.2 PureTech 110|E|C|100|72|20.5","1.5 BlueHDi 100|D|C|180|120|22.5"]],
+ "C3 IV":[2024,0,["1.2 PureTech 100|E|C|100|72|19.5","ë-C3 113|L|-|||23.3"]],
+ "C3 Pluriel":[2003,2010,["1.6 16v 110|E|C|120|72|17.5"]],
+ "C4 Aircross":[2012,2017,["1.6 HDi 115|D|C|180|120|27.5"]],
+ "C4 Cactus":[2014,2020,["1.2 PureTech 110|E|C|100|72|20.5","1.6 BlueHDi 100|D|C|180|120|22.5"]],
+ "C4 I":[2004,2010,["1.6 16v 110|E|C|120|72|18.5","1.6 HDi 110|D|C|180|120|20.5","2.0 HDi 138|D|C|180|120|23.5"]],
+ "C4 II":[2010,2018,["1.2 PureTech 110|E|C|100|72|21.5","1.6 BlueHDi 100|D|C|180|120|23.5"]],
+ "C4 III / ë-C4":[2020,0,["1.2 PureTech 130|E|C|100|72|28.5","1.5 BlueHDi 130|D|C|180|120|30.5","ë-C4 136|L|-|||37.5"]],
+ "C4 Picasso / SpaceTourer":[2013,2022,["1.2 PureTech 130|E|C|100|72|27.5","1.5 BlueHDi 130|D|C|180|120|30.5"]],
+ "C5 Aircross I":[2018,2025,["1.2 PureTech 130|E|C|100|72|29.5","1.5 BlueHDi 130|D|C|180|120|32.5","Hybrid 225|H|C|100|72|45.5"]],
+ "C5 Aircross II":[2025,0,["Hybrid 145|H|C|100|72|36.5","ë-C5 Aircross 213|L|-|||44.5"]],
+ "C5 I":[2001,2008,["2.0 HDi 110|D|C|180|120|24.5","1.8 16v 117|E|C|120|72|22.5"]],
+ "C5 II":[2008,2017,["1.6 HDi 112|D|C|180|120|28.5","2.0 HDi 150|D|C|180|120|33.5"]],
+ "C5 X":[2021,0,["1.2 PureTech 130|E|C|100|72|36.5","Hybrid 225|H|C|100|72|48.5"]],
+ "C6":[2005,2012,["2.7 HDi V6 204|D|C|180|120|48.5"]],
+ "C8":[2002,2014,["2.0 HDi 136|D|C|180|120|30.5"]],
+ "ë-C3 Aircross":[2024,0,["1.2 Hybrid 136|H|C|100|72|25.5","ë-C3 Aircross 113|L|-|||27.5"]],
+ "Jumper":[2006,0,["2.2 BlueHDi 140|D|C|180|120|33.5","2.2 BlueHDi 165|D|C|180|120|36.5"]],
+ "Jumpy / SpaceTourer":[2016,0,["1.6 BlueHDi 115|D|C|180|120|29.5","2.0 BlueHDi 180|D|C|180|120|38.5"]],
+ "Nemo":[2008,2017,["1.4 HDi 70|D|C|180|120|14.5"]],
+ "Saxo":[1996,2003,["1.1 60|E|C|120|72|9.5","1.4 75|E|C|120|72|10.9","1.5 D 58|D|C|120|72|11.5"]],
+ "Xsara":[1997,2006,["1.4 75|E|C|120|72|14.5","1.6 16v 110|E|C|120|72|16.5","2.0 HDi 90|D|C|180|120|17.9"]],
+ "Xsara Picasso":[1999,2012,["1.6 16v 110|E|C|120|72|18.5","1.6 HDi 110|D|C|180|120|20.5"]]
+},
+"Cupra":{
+ "Ateca (Cupra)":[2018,0,["2.0 TSI 300|E|N|||46.5"]],
+ "Born":[2021,0,["Born 58 kWh 204|L|-|||42.5"]],
+ "Formentor":[2020,0,["1.5 TSI 150|E|C|180|84|34.5","2.0 TSI 310|E|C|180|84|50.5","e-Hybrid 245|H|C|180|84|44.5"]],
+ "Leon":[2020,0,["1.5 TSI 150|E|C|180|84|31.5","2.0 TSI 300|E|C|180|84|46.5"]],
+ "Tavascan":[2024,0,["Tavascan Endurance 286|L|-|||53.5"]],
+ "Terramar":[2024,0,["1.5 eTSI 150|E|C|180|84|42.5"]]
+},
+"Dacia":{
+ "Bigster":[2025,0,["1.8 Hybrid 155|H|N|||29.5"]],
+ "Dokker":[2012,2021,["1.5 dCi 90|D|C|120|72|13.5","1.2 TCe 115|E|N|||14.5"]],
+ "Duster I":[2010,2017,["1.5 dCi 110|D|C|120|72|15.9","1.6 16v 105|E|C|120|72|13.9"]],
+ "Duster II":[2017,2024,["1.3 TCe 130|E|N|||17.9","1.5 Blue dCi 115|D|C|120|72|19.5","1.0 ECO-G 100|E|N|||16.5"]],
+ "Duster III":[2024,0,["1.2 TCe 130 mild hybrid|E|N|||24.5","1.6 Hybrid 140|H|N|||27.5"]],
+ "Jogger":[2022,0,["1.0 TCe 110|E|N|||18.5","1.6 Hybrid 140|H|N|||25.5"]],
+ "Lodgy":[2012,2022,["1.5 dCi 110|D|C|120|72|14.9","1.3 TCe 130|E|N|||16.5"]],
+ "Logan":[2004,0,["1.5 dCi 90|D|C|120|72|11.5","1.0 TCe 90|E|N|||12.5"]],
+ "Logan I":[2004,2012,["1.4 75|E|C|120|72|8.5","1.6 16v 105|E|C|120|72|10.5","1.5 dCi 85|D|C|120|72|11.5"]],
+ "Logan MCV":[2006,2020,["1.5 dCi 90|D|C|120|72|11.9","1.0 SCe 75|E|N|||10.5","0.9 TCe 90|E|N|||11.9"]],
+ "Sandero I":[2008,2012,["1.4 75|E|C|120|72|7.9","1.5 dCi 70|D|C|120|72|9.9"]],
+ "Sandero II":[2012,2020,["1.0 SCe 75|E|N|||8.9","0.9 TCe 90|E|N|||10.9","1.5 dCi 90|D|C|120|72|12.5"]],
+ "Sandero III":[2020,0,["1.0 SCe 65|E|N|||11.5","1.0 TCe 90|E|N|||13.5","1.0 ECO-G 100|E|N|||14.5"]],
+ "Spring":[2021,0,["Spring 45 / 65|L|-|||19.8"]]
+},
+"Dodge":{
+ "Journey":[2008,2011,["2.0 CRD 140|D|C|180|120|29.5"]],
+ "Nitro":[2007,2011,["2.8 CRD 177|D|N|||33.5"]]
+},
+"DS":{
+ "DS 3":[2009,2019,["1.2 PureTech 110|E|C|100|72|19.5","1.6 BlueHDi 100|D|C|180|120|21.5","1.6 THP 165|E|N|||25.5"]],
+ "DS 3 Crossback":[2019,0,["1.2 PureTech 130|E|C|100|72|29.5","1.5 BlueHDi 130|D|C|180|120|31.5","E-Tense 136|L|-|||39.5"]],
+ "DS 4":[2021,0,["1.2 PureTech 130|E|C|100|72|33.5","1.5 BlueHDi 130|D|C|180|120|35.5","E-Tense 225|H|C|100|72|46.5"]],
+ "DS 4 (2011)":[2011,2018,["1.6 THP 165|E|N|||26.5","1.6 BlueHDi 120|D|C|180|120|27.5","2.0 BlueHDi 180|D|C|180|120|31.5"]],
+ "DS 5":[2011,2018,["1.6 THP 165|E|N|||32.5","2.0 BlueHDi 180|D|C|180|120|36.5","Hybrid4 200|H|C|180|120|42.5"]],
+ "DS 7":[2017,0,["1.2 PureTech 130|E|C|100|72|38.5","1.5 BlueHDi 130|D|C|180|120|40.5","E-Tense 300|H|C|100|72|56.5"]],
+ "DS 9":[2020,0,["E-Tense 225|H|C|100|72|58.5"]],
+ "DS N°8":[2025,0,["N°8 230|L|-|||57.5"]]
+},
+"Fiat":{
+ "500":[2007,0,["1.2 8v 69|E|N|||13.5","0.9 TwinAir 85|E|C|120|72|15.5","1.0 Hybrid 70|E|N|||16.5"]],
+ "500e":[2020,0,["500e 118|L|-|||30.5"]],
+ "500L":[2012,2022,["1.4 16v 95|E|C|120|72|18.5","1.3 MultiJet 95|D|N|||20.5","1.6 MultiJet 120|D|C|180|120|22.5"]],
+ "500X":[2015,0,["1.0 FireFly 120|E|N|||22.5","1.3 FireFly 150|E|N|||26.5","1.6 MultiJet 120|D|C|180|120|25.5"]],
+ "600 / 600e":[2023,0,["1.2 Hybrid 136|H|C|100|72|26.5","600e 156|L|-|||36.5"]],
+ "Bravo":[2007,2014,["1.4 T-Jet 120|E|N|||19.5","1.6 MultiJet 120|D|C|180|120|21.5"]],
+ "Croma":[2005,2011,["1.9 MultiJet 150|D|C|180|120|25.5"]],
+ "Doblo":[2010,0,["1.6 MultiJet 105|D|C|180|120|20.5","1.5 BlueHDi 130|D|C|180|120|26.5"]],
+ "Ducato":[2006,0,["2.3 MultiJet 130|D|N|||34.5","2.3 MultiJet 160|D|N|||38.5"]],
+ "Fiorino":[2008,0,["1.3 MultiJet 95|D|N|||16.5"]],
+ "Freemont":[2011,2016,["2.0 MultiJet 140|D|C|180|120|29.5"]],
+ "Grande Panda":[2024,0,["1.2 Hybrid 110|E|C|100|72|18.9","Grande Panda électrique 113|L|-|||24.9"]],
+ "Grande Punto / Punto Evo":[2005,2018,["1.2 8v 65|E|C|120|72|12.5","1.4 8v 77|E|C|120|72|13.5","1.3 MultiJet 95|D|N|||15.9"]],
+ "Idea":[2003,2012,["1.4 16v 95|E|C|120|72|15.5","1.3 MultiJet 90|D|N|||17.5"]],
+ "Multipla":[1998,2010,["1.6 16v 103|E|C|120|72|18.5","1.9 JTD 115|D|C|180|120|20.5"]],
+ "Panda":[2011,0,["1.2 8v 69|E|N|||11.5","1.0 Hybrid 70|E|N|||14.5"]],
+ "Punto I/II":[1993,2010,["1.2 8v 60|E|C|120|72|10.5","1.2 16v 80|E|C|120|72|11.9","1.3 MultiJet 70|D|N|||13.5"]],
+ "Qubo":[2008,2020,["1.3 MultiJet 95|D|N|||15.5","1.4 8v 77|E|C|120|72|14.5"]],
+ "Sedici":[2006,2014,["1.6 16v 120|E|C|120|72|18.5","2.0 MultiJet 135|D|C|180|120|21.5"]],
+ "Talento / Scudo":[2007,0,["1.6 MultiJet 120|D|C|120|72|28.5","2.0 MultiJet 145|D|C|180|120|32.5"]],
+ "Tipo":[2016,0,["1.4 T-Jet 120|E|N|||18.5","1.6 MultiJet 120|D|C|180|120|21.5","1.0 FireFly 100|E|N|||19.5"]],
+ "Topolino":[2023,0,["Topolino 6 kW|L|-|||9.9"]]
+},
+"Ford":{
+ "B-Max":[2012,2017,["1.0 EcoBoost 100|E|C|150|120|18.5","1.5 TDCi 95|D|C|180|120|20.5"]],
+ "C-Max / Grand C-Max":[2003,2019,["1.6 TDCi 115|D|C|180|120|24.5","1.0 EcoBoost 125|E|C|150|120|23.5"]],
+ "Capri (électrique)":[2024,0,["Capri Extended Range 286|L|-|||51.5"]],
+ "EcoSport":[2013,2022,["1.0 EcoBoost 125|E|C|150|120|21.5","1.5 TDCi 100|D|C|180|120|22.5"]],
+ "Edge":[2016,2020,["2.0 TDCi 180|D|C|180|120|45.5"]],
+ "Explorer (électrique)":[2024,0,["Explorer Extended Range 286|L|-|||49.5"]],
+ "Fiesta V":[2002,2008,["1.25 75|E|C|150|120|12.5","1.4 TDCi 68|D|C|180|120|14.5"]],
+ "Fiesta VI":[2008,2017,["1.25 82|E|C|150|120|14.5","1.0 EcoBoost 100|E|C|150|120|17.5","1.5 TDCi 95|D|C|180|120|18.5"]],
+ "Fiesta VII":[2017,2023,["1.1 Ti-VCT 75|E|C|150|120|16.5","1.0 EcoBoost 100|E|C|150|120|19.5","1.5 TDCi 85|D|C|180|120|20.5"]],
+ "Focus I":[1998,2004,["1.6 16v 100|E|C|150|120|16.5","1.8 TDCi 100|D|C|180|120|18.5"]],
+ "Focus II":[2004,2011,["1.6 16v 100|E|C|150|120|18.5","1.6 TDCi 109|D|C|180|120|20.5","2.0 TDCi 136|D|C|180|120|23.5"]],
+ "Focus III":[2011,2018,["1.0 EcoBoost 125|E|C|150|120|22.5","1.5 TDCi 120|D|C|180|120|25.5","1.6 TDCi 115|D|C|180|120|24.5"]],
+ "Focus IV":[2018,0,["1.0 EcoBoost 125|E|C|150|120|26.5","1.5 EcoBlue 120|D|C|180|120|29.5"]],
+ "Ka I/II":[1996,2016,["1.3 60|E|C|150|120|9.9","1.2 69|E|C|120|72|11.5"]],
+ "Ka+":[2016,2020,["1.2 Ti-VCT 85|E|C|150|120|13.5"]],
+ "Kuga I":[2008,2012,["2.0 TDCi 136|D|C|180|120|29.5"]],
+ "Kuga II":[2012,2019,["1.5 TDCi 120|D|C|180|120|29.5","2.0 TDCi 150|D|C|180|120|33.5"]],
+ "Kuga III":[2019,0,["1.5 EcoBoost 150|E|C|150|120|32.5","2.5 Hybride rechargeable 225|H|N|||44.5"]],
+ "Mondeo III":[2000,2007,["2.0 TDCi 130|D|C|180|120|26.5","1.8 16v 125|E|C|150|120|24.5"]],
+ "Mondeo IV":[2014,2022,["2.0 TDCi 150|D|C|180|120|32.5","2.0 Hybride 187|H|N|||36.5"]],
+ "Mustang":[2015,0,["2.3 EcoBoost 290|E|N|||48.5","5.0 V8 450|E|N|||62.5"]],
+ "Mustang Mach-E":[2021,0,["Standard Range 269|L|-|||53.5","Extended Range 294|L|-|||62.5"]],
+ "Puma":[2019,0,["1.0 EcoBoost mHEV 125|E|C|150|120|25.5","1.0 EcoBoost mHEV 155|E|C|150|120|29.5"]],
+ "Puma Gen-E":[2025,0,["Puma Gen-E 168|L|-|||34.5"]],
+ "Ranger":[2011,0,["2.0 EcoBlue 213|D|C|180|120|45.5"]],
+ "S-Max / Galaxy":[2006,2023,["2.0 TDCi 150|D|C|180|120|34.5","2.0 EcoBlue 190|D|C|180|120|39.5"]],
+ "Tourneo Courier":[2014,0,["1.5 TDCi 100|D|C|180|120|21.5","1.0 EcoBoost 125|E|C|150|120|22.5"]],
+ "Transit / Transit Connect":[2000,0,["1.5 EcoBlue 100|D|C|180|120|24.5","2.0 EcoBlue 130|D|C|180|120|33.5"]],
+ "Transit Custom":[2012,0,["2.0 EcoBlue 130|D|C|180|120|32.5","2.0 EcoBlue 170|D|C|180|120|36.5"]]
+},
+"Genesis":{
+ "G70":[2021,0,["2.2 CRDi 202|D|N|||48.5","2.0 T-GDi 245|E|N|||50.5"]],
+ "GV60":[2022,0,["GV60 Premium 314|L|-|||62.5"]],
+ "GV70":[2021,0,["2.2 CRDi 210|D|N|||58.5","GV70 Electrified 490|L|-|||72.5"]]
+},
+"Honda":{
+ "Accord":[1998,2015,["2.0 i-VTEC 156|E|N|||30.5","2.2 i-DTEC 150|D|C|180|120|33.5"]],
+ "Civic IX/X/XI":[2012,0,["1.0 VTEC Turbo 126|E|N|||25.5","1.6 i-DTEC 120|D|C|180|120|27.5","2.0 e:HEV 184|H|N|||36.5"]],
+ "Civic VII/VIII":[2001,2011,["1.4 i-DSI 83|E|N|||18.5","1.8 i-VTEC 140|E|N|||22.5","2.2 i-CTDi 140|D|C|180|120|24.5"]],
+ "CR-V III/IV":[2006,2018,["2.2 i-DTEC 150|D|C|180|120|33.5","2.0 i-VTEC 155|E|N|||31.5"]],
+ "CR-V V/VI":[2018,0,["1.6 i-DTEC 160|D|C|180|120|36.5","2.0 e:HEV 184|H|N|||42.5"]],
+ "CR-Z":[2010,2016,["1.5 Hybride 124|H|N|||24.5"]],
+ "e:Ny1":[2023,0,["e:Ny1 204|L|-|||47.5"]],
+ "FR-V":[2004,2009,["1.8 i-VTEC 140|E|N|||24.5","2.2 i-CTDi 140|D|C|180|120|26.5"]],
+ "Honda e":[2020,2024,["Honda e 136|L|-|||35.5"]],
+ "HR-V":[2015,0,["1.5 i-VTEC 130|E|N|||26.5","1.5 e:HEV 131|H|N|||32.5"]],
+ "HR-V I":[1999,2006,["1.6 16v 105|E|C|120|72|18.5"]],
+ "Insight":[2009,2014,["1.3 Hybride 88|H|N|||21.5"]],
+ "Jazz I/II":[2001,2015,["1.2 i-VTEC 90|E|N|||14.5","1.4 i-VTEC 100|E|N|||16.5"]],
+ "Jazz III/IV":[2015,0,["1.3 i-VTEC 102|E|N|||17.5","1.5 e:HEV 109|H|N|||25.5"]],
+ "ZR-V":[2023,0,["2.0 e:HEV 184|H|N|||42.5"]]
+},
+"Hyundai":{
+ "Accent":[1994,2011,["1.4 97|E|C|120|72|12.5","1.5 CRDi 110|D|N|||14.5"]],
+ "Bayon":[2021,0,["1.0 T-GDi 100|E|N|||21.5"]],
+ "Elantra":[2000,2020,["1.6 CRDi 136|D|N|||24.5","1.6 GDi 132|E|N|||22.5"]],
+ "Getz":[2002,2009,["1.1 66|E|C|120|72|11.5","1.5 CRDi 88|D|N|||13.5"]],
+ "H-1 / Staria":[2008,0,["2.5 CRDi 170|D|N|||38.5","2.2 CRDi 177|D|N|||48.5"]],
+ "i10":[2008,0,["1.0 67|E|N|||12.5","1.2 84|E|N|||14.5"]],
+ "i20":[2008,0,["1.2 84|E|N|||15.5","1.0 T-GDi 100|E|N|||19.5"]],
+ "i20 N / i30 N":[2018,0,["2.0 T-GDi 280|E|N|||38.5","1.6 T-GDi 204|E|N|||29.5"]],
+ "i30":[2007,0,["1.0 T-GDi 120|E|N|||22.5","1.6 CRDi 116|D|N|||25.5","1.5 T-GDi 160|E|N|||27.5"]],
+ "i30 I/II":[2007,2017,["1.4 109|E|N|||19.5","1.6 CRDi 110|D|N|||22.5","1.6 GDi 135|E|N|||21.5"]],
+ "i40":[2011,2019,["1.7 CRDi 141|D|N|||29.5","1.6 GDi 135|E|N|||27.5"]],
+ "Inster":[2024,0,["Inster 49 kWh 115|L|-|||26.5"]],
+ "Ioniq":[2016,2022,["Hybride 141|H|N|||29.5","Électrique 136|L|-|||36.5"]],
+ "Ioniq 5":[2021,0,["Ioniq 5 58 kWh 170|L|-|||45.5","Ioniq 5 77 kWh 229|L|-|||52.5"]],
+ "Ioniq 6":[2022,0,["Ioniq 6 77 kWh 229|L|-|||52.5"]],
+ "ix20":[2010,2019,["1.4 90|E|N|||17.5","1.6 CRDi 115|D|N|||20.5"]],
+ "ix35":[2010,2015,["1.7 CRDi 115|D|N|||26.5","2.0 CRDi 136|D|N|||29.5"]],
+ "Kona I":[2017,2023,["1.0 T-GDi 120|E|N|||22.5","Hybride 141|H|N|||29.5","Kona électrique 204|L|-|||40.5"]],
+ "Kona II":[2023,0,["1.0 T-GDi 120|E|N|||27.5","Hybride 141|H|N|||33.5","Kona électrique 218|L|-|||42.5"]],
+ "Matrix":[2001,2010,["1.6 103|E|C|120|72|15.5","1.5 CRDi 110|D|N|||17.5"]],
+ "Santa Fe":[2012,0,["2.2 CRDi 202|D|N|||48.5","Hybride 230|H|N|||53.5"]],
+ "Tucson I/II":[2004,2015,["2.0 CRDi 136|D|N|||27.5","1.7 CRDi 115|D|N|||26.5"]],
+ "Tucson III/IV":[2015,0,["1.6 CRDi 136|D|N|||33.5","1.6 T-GDi Hybride 230|H|N|||42.5"]],
+ "Veloster":[2011,2017,["1.6 GDi 140|E|N|||22.5"]]
+},
+"Infiniti":{
+ "Q30 / QX30":[2015,2019,["1.5d 109|D|N|||30.5","2.2d 170|D|N|||35.5"]],
+ "Q50":[2013,2019,["2.2d 170|D|N|||38.5","3.5 Hybride 364|H|N|||52.5"]]
+},
+"Isuzu":{
+ "D-Max":[2012,0,["1.9 Ddi 164|D|N|||33.5"]]
+},
+"Iveco":{
+ "Daily":[1999,0,["2.3 HPI 136|D|N|||36.5","3.0 HPI 180|D|N|||42.5"]]
+},
+"Jaguar":{
+ "E-Pace":[2017,0,["D165|D|C|180|120|45.5","P250|E|N|||48.5"]],
+ "F-Pace":[2016,0,["D200|D|C|180|120|58.5","P250|E|N|||60.5"]],
+ "F-Type":[2013,2024,["2.0 300|E|N|||72.5","5.0 V8 450|E|N|||98.5"]],
+ "I-Pace":[2018,0,["I-Pace EV400|L|-|||82.5"]],
+ "S-Type":[1999,2008,["2.7 D 207|D|C|180|120|45.5"]],
+ "X-Type":[2001,2009,["2.0 D 130|D|C|180|120|30.5","2.2 D 155|D|C|180|120|33.5"]],
+ "XE":[2015,2024,["D180|D|C|180|120|42.5","P250|E|N|||45.5"]],
+ "XF":[2007,0,["2.0 D180|D|C|180|120|48.5","3.0 D 275|D|N|||62.5"]],
+ "XJ":[2003,2019,["3.0 D 275|D|N|||82.5"]]
+},
+"Jeep":{
+ "Avenger":[2023,0,["1.2 Turbo 100|E|C|100|72|27.5","Avenger électrique 156|L|-|||37.5","1.2 Hybrid 4xe 145|H|C|100|72|34.5"]],
+ "Cherokee":[2001,2023,["2.2 MultiJet 195|D|C|180|120|45.5","2.0 MultiJet 140|D|C|180|120|38.5"]],
+ "Commander (2022)":[2022,0,["1.3 GSE 4xe 240|H|N|||52.5"]],
+ "Compass":[2017,0,["1.3 GSE 130|E|N|||31.5","1.6 MultiJet 130|D|C|180|120|33.5","4xe 240|H|N|||49.5"]],
+ "Grand Cherokee":[1999,0,["3.0 CRD 241|D|N|||62.5","2.0 4xe 380|H|N|||85.5"]],
+ "Patriot":[2007,2016,["2.2 CRD 163|D|C|180|120|28.5"]],
+ "Renegade":[2014,0,["1.6 E-torQ 110|E|C|120|72|22.5","1.0 GSE 120|E|N|||25.5","1.6 MultiJet 120|D|C|180|120|27.5","4xe 240|H|N|||46.5"]],
+ "Wrangler":[2007,0,["2.2 MultiJet 200|D|C|180|120|55.5","2.0 T 272|E|N|||58.5"]]
+},
+"Kia":{
+ "Carens":[2002,2019,["1.7 CRDi 115|D|N|||24.5","1.6 GDi 135|E|N|||23.5"]],
+ "Cee'd I":[2006,2012,["1.4 109|E|N|||18.5","1.6 CRDi 115|D|N|||21.5"]],
+ "Ceed":[2012,0,["1.0 T-GDi 120|E|N|||22.5","1.6 CRDi 136|D|N|||26.5","1.5 T-GDi 160|E|N|||27.5"]],
+ "EV3":[2024,0,["EV3 Long Range 204|L|-|||42.5"]],
+ "EV6":[2021,0,["EV6 77 kWh 229|L|-|||52.5"]],
+ "EV9":[2023,0,["EV9 GT-Line 384|L|-|||78.5"]],
+ "Niro I":[2016,2022,["Hybride 141|H|N|||31.5","e-Niro 204|L|-|||42.5"]],
+ "Niro II":[2022,0,["Hybride 141|H|N|||34.5","Niro EV 204|L|-|||45.5"]],
+ "Optima":[2012,2020,["1.7 CRDi 141|D|N|||31.5","2.0 PHEV 205|H|N|||42.5"]],
+ "Picanto":[2011,0,["1.0 67|E|N|||12.5","1.2 84|E|N|||14.5"]],
+ "Picanto I":[2004,2011,["1.0 62|E|C|120|72|9.5","1.1 CRDi 75|D|N|||11.5"]],
+ "ProCeed":[2019,0,["1.5 T-GDi 160|E|N|||30.5","1.6 CRDi 136|D|N|||31.5"]],
+ "Rio":[2011,0,["1.2 84|E|N|||15.5","1.0 T-GDi 100|E|N|||19.5"]],
+ "Rio I/II":[2000,2011,["1.4 97|E|C|120|72|12.5","1.5 CRDi 110|D|N|||14.5"]],
+ "Sorento":[2015,0,["2.2 CRDi 202|D|N|||50.5","Hybride rechargeable 265|H|N|||62.5"]],
+ "Soul":[2008,0,["1.6 CRDi 128|D|N|||22.5","e-Soul 204|L|-|||38.5"]],
+ "Sportage I/II":[1993,2010,["2.0 CRDi 140|D|N|||25.5"]],
+ "Sportage III/IV/V":[2010,0,["1.6 CRDi 136|D|N|||34.5","1.6 T-GDi Hybride 230|H|N|||43.5"]],
+ "Stinger":[2017,2023,["2.2 CRDi 200|D|N|||48.5","3.3 T-GDi 370|E|N|||62.5"]],
+ "Stonic":[2017,0,["1.0 T-GDi 100|E|N|||20.5","1.0 T-GDi Hybride 120|E|N|||23.5"]],
+ "Venga":[2010,2019,["1.4 90|E|N|||17.5","1.6 CRDi 115|D|N|||20.5"]],
+ "XCeed":[2019,0,["1.0 T-GDi 120|E|N|||25.5","1.6 Hybride rechargeable 141|H|N|||38.5","1.6 GDi PHEV 141|H|N|||38.5"]]
+},
+"Lada":{
+ "Niva":[1977,2022,["1.7i 83|E|C|120|72|13.5"]]
+},
+"Lancia":{
+ "Delta (2008)":[2008,2014,["1.6 MultiJet 120|D|C|180|120|24.5","1.4 T-Jet 150|E|N|||23.5"]],
+ "Musa":[2004,2012,["1.3 MultiJet 90|D|N|||17.5","1.4 16v 95|E|C|120|72|16.5"]],
+ "Voyager":[2011,2015,["2.8 CRD 178|D|N|||42.5"]],
+ "Ypsilon (2011-2024)":[2011,2024,["1.2 69|E|N|||14.5","1.0 Hybrid 70|E|N|||17.5","Ypsilon électrique 156|L|-|||34.5"]],
+ "Ypsilon (2024)":[2024,0,["1.2 Hybrid 110|E|C|100|72|24.9","Ypsilon électrique 156|L|-|||34.9"]]
+},
+"Land Rover":{
+ "Defender":[2020,0,["D250|D|N|||68.5","P300|E|N|||72.5"]],
+ "Discovery":[1998,0,["3.0 TDV6 249|D|N|||68.5","2.0 SD4 240|D|C|180|120|58.5"]],
+ "Discovery Sport":[2015,0,["2.0 D165|D|C|180|120|45.5","P200|E|N|||48.5"]],
+ "Freelander":[1997,2014,["2.2 TD4 150|D|C|180|120|32.5","2.0 Td4 112|D|C|180|120|26.5"]],
+ "Range Rover":[2002,0,["3.0 TDV6 258|D|N|||105.5","D350|D|N|||135.5"]],
+ "Range Rover Evoque":[2011,0,["2.0 D150|D|C|180|120|44.5","P250|E|N|||49.5"]],
+ "Range Rover Sport":[2005,0,["3.0 SDV6 306|D|N|||85.5","P400e 404|H|N|||95.5"]],
+ "Range Rover Velar":[2017,0,["D200|D|C|180|120|62.5","P400e 404|H|N|||75.5"]]
+},
+"Leapmotor":{
+ "B10":[2025,0,["B10 218|L|-|||31.5"]],
+ "C10":[2024,0,["C10 218|L|-|||36.5"]],
+ "T03":[2024,0,["T03 95|L|-|||18.9"]]
+},
+"Lexus":{
+ "CT":[2011,2020,["CT 200h 136|H|N|||33.5"]],
+ "ES":[2018,0,["ES 300h 218|H|N|||52.5"]],
+ "GS":[1997,2018,["GS 300h 223|H|N|||55.5","GS 450h 345|H|N|||68.5"]],
+ "IS":[1999,0,["IS 220d 177|D|N|||38.5","IS 300h 223|H|N|||45.5"]],
+ "LBX":[2023,0,["LBX 1.5 Hybride 136|H|N|||35.5"]],
+ "LC":[2017,0,["LC 500h 359|H|N|||115.5"]],
+ "LS":[2000,0,["LS 500h 359|H|N|||115.5"]],
+ "NX":[2014,0,["NX 350h 242|H|N|||56.5","NX 450h+ 309|H|N|||68.5"]],
+ "RX":[2009,0,["RX 450h 313|H|N|||72.5"]],
+ "RZ":[2023,0,["RZ 450e 313|L|-|||72.5"]],
+ "UX":[2019,0,["UX 250h 184|H|N|||41.5","UX 300e 204|L|-|||52.5"]]
+},
+"Ligier":{
+ "JS50 / JS60":[2012,0,["Diesel 6 kW|D|C|60|60|13.9","Myli électrique 8 kW|L|-|||17.5"]]
+},
+"Maserati":{
+ "Ghibli":[2013,2024,["3.0 V6 Diesel 275|D|N|||78.5","2.0 Hybrid 330|H|N|||82.5"]],
+ "Grecale":[2022,0,["2.0 GT 300|H|N|||82.5","Folgore 557|L|-|||115.5"]],
+ "Levante":[2016,0,["3.0 V6 Diesel 275|D|N|||88.5"]]
+},
+"Maxus":{
+ "eDeliver 3 / 9":[2021,0,["eDeliver 3 122|L|-|||38.5","eDeliver 9 204|L|-|||58.5"]],
+ "T90 EV":[2023,0,["T90 EV 204|L|-|||48.5"]]
+},
+"Mazda":{
+ "BT-50":[2006,2020,["2.5 MZR-CD 143|D|N|||31.5"]],
+ "CX-3":[2015,2021,["2.0 Skyactiv-G 121|E|N|||23.5"]],
+ "CX-5 I":[2012,2017,["2.2 Skyactiv-D 150|D|N|||37.5","2.0 Skyactiv-G 165|E|N|||35.5"]],
+ "CX-5 II":[2017,0,["2.2 Skyactiv-D 184|D|N|||41.5","2.0 Skyactiv-G 165|E|N|||36.5"]],
+ "CX-7":[2007,2012,["2.2 MZR-CD 173|D|N|||34.5"]],
+ "CX-30":[2019,0,["2.0 e-Skyactiv-G 122|E|N|||28.5","e-Skyactiv X 186|E|N|||33.5"]],
+ "CX-60":[2022,0,["3.3 e-Skyactiv D 200|D|N|||48.5","2.5 PHEV 327|H|N|||56.5"]],
+ "CX-80":[2024,0,["3.3 e-Skyactiv D 254|D|N|||58.5"]],
+ "Mazda 323":[1994,2004,["1.5 16v 88|E|C|120|72|13.5","2.0 DiTD 101|D|C|120|72|16.5"]],
+ "Mazda2":[2007,0,["1.5 Skyactiv-G 90|E|N|||17.5","1.5 Hybrid 116|H|N|||22.5"]],
+ "Mazda2 I/II":[2003,2014,["1.3 MZR 84|E|N|||14.5","1.4 CiTD 68|D|C|180|120|15.5"]],
+ "Mazda3":[2009,0,["2.0 Skyactiv-G 122|E|N|||26.5","1.8 Skyactiv-D 116|D|N|||29.5","e-Skyactiv X 186|E|N|||32.5"]],
+ "Mazda3 I":[2003,2009,["1.6 MZR 105|E|C|120|72|17.5","1.6 CiTD 109|D|C|180|120|20.5","2.0 MZR 150|E|N|||21.5"]],
+ "Mazda3 II":[2009,2013,["1.6 MZ-CD 115|D|C|180|120|22.5","2.0 MZR 151|E|N|||24.5"]],
+ "Mazda5 / Premacy":[1999,2015,["1.6 MZ-CD 115|D|C|180|120|24.5","2.0 MZR 146|E|N|||25.5"]],
+ "Mazda6":[2012,2023,["2.0 Skyactiv-G 165|E|N|||33.5","2.2 Skyactiv-D 150|D|N|||36.5"]],
+ "Mazda6 I/II":[2002,2012,["2.0 MZR-CD 140|D|N|||27.5","2.2 MZR-CD 163|D|N|||30.5","2.0 MZR 147|E|N|||28.5"]],
+ "MX-5":[2015,0,["1.5 Skyactiv-G 132|E|N|||29.5","2.0 Skyactiv-G 184|E|N|||33.5"]],
+ "MX-30":[2020,0,["MX-30 145|L|-|||36.5"]],
+ "RX-8":[2003,2012,["1.3 Renesis 231|E|N|||32.5"]]
+},
+"Mercedes-Benz":{
+ "Citan":[2012,0,["109 CDI 95|D|C|120|72|24.5","110 CDI 95|D|C|120|72|26.5"]],
+ "CLA":[2013,0,["CLA200d 150|D|N|||40.5","CLA200 163|E|N|||41.5"]],
+ "CLA Shooting Brake":[2015,0,["CLA200d 150|D|N|||42.5","CLA200 163|E|N|||43.5"]],
+ "Classe A W168":[1997,2004,["A140 82|E|N|||19.5","A170 CDI 95|D|N|||21.5"]],
+ "Classe A W169":[2004,2012,["A150 95|E|N|||23.5","A180 CDI 109|D|N|||26.5","A200 CDI 140|D|N|||29.5"]],
+ "Classe A W176":[2012,2018,["A180 CDI 109|D|N|||29.5","A200 156|E|N|||32.5"]],
+ "Classe A W177":[2018,0,["A180d 116|D|N|||35.5","A200 163|E|N|||37.5","A250e 218|H|N|||44.5"]],
+ "Classe B":[2011,0,["B180d 116|D|N|||33.5","B200 163|E|N|||35.5"]],
+ "Classe C W203":[2000,2007,["C200 CDI 122|D|N|||32.5","C180 Kompressor 143|E|N|||33.5"]],
+ "Classe C W204":[2007,2014,["C180 156|E|N|||37.5","C200 CDI 136|D|N|||38.5","C220 CDI 170|D|N|||42.5"]],
+ "Classe C W205":[2014,2021,["C200d 160|D|N|||40.5","C220d 194|D|N|||44.5","C200 184|E|N|||43.5"]],
+ "Classe C W206":[2021,0,["C200d 163|D|N|||49.5","C300e 313|H|N|||59.5"]],
+ "Classe E W211":[2002,2009,["E220 CDI 170|D|N|||48.5","E280 CDI 190|D|N|||56.5"]],
+ "Classe E W212":[2009,2016,["E200 CDI 136|D|N|||49.5","E220 CDI 170|D|N|||53.5","E250 CDI 204|D|N|||58.5"]],
+ "Classe E W213":[2016,2023,["E220d 194|D|N|||55.5","E300de 306|H|N|||65.5"]],
+ "Classe E W214":[2023,0,["E220d 197|D|N|||68.5","E300e 313|H|N|||78.5"]],
+ "Classe S":[1998,0,["S350d 286|D|N|||115.5","S500 435|E|N|||135.5"]],
+ "Classe V":[2014,0,["V220d 163|D|N|||52.5","V250d 190|D|N|||58.5"]],
+ "CLS":[2004,2023,["CLS 250 CDI 204|D|N|||62.5","CLS 350d 286|D|N|||78.5"]],
+ "EQA":[2021,0,["EQA250 190|L|-|||50.5"]],
+ "EQB":[2021,0,["EQB250 190|L|-|||55.5"]],
+ "EQC":[2019,2023,["EQC 400 408|L|-|||78.5"]],
+ "EQE":[2022,0,["EQE 350+ 292|L|-|||82.5"]],
+ "EQS":[2021,0,["EQS 450+ 333|L|-|||125.5"]],
+ "GLA":[2014,0,["GLA200d 150|D|N|||39.5","GLA200 163|E|N|||40.5"]],
+ "GLB":[2019,0,["GLB200d 150|D|N|||45.5","GLB200 163|E|N|||46.5"]],
+ "GLC":[2015,0,["GLC220d 194|D|N|||55.5","GLC300e 320|H|N|||67.5"]],
+ "GLC Coupé":[2016,0,["GLC 220d 194|D|N|||58.5","GLC 300e 320|H|N|||70.5"]],
+ "GLK":[2008,2015,["GLK 220 CDI 170|D|N|||44.5"]],
+ "GLS":[2015,0,["GLS 400d 330|D|N|||112.5"]],
+ "ML / GLE":[2005,0,["ML 250 CDI 204|D|N|||62.5","GLE 300d 245|D|N|||78.5","GLE 350de 320|H|N|||88.5"]],
+ "SLK / SLC":[1996,2020,["SLK 200 184|E|N|||45.5","SLK 250 CDI 204|D|N|||48.5"]],
+ "Sprinter":[2006,0,["311 CDI 114|D|N|||38.5","316 CDI 163|D|N|||43.5"]],
+ "Vito":[2014,0,["110 CDI 102|D|N|||31.5","116 CDI 163|D|N|||38.5"]]
+},
+"MG":{
+ "Cyberster":[2024,0,["Cyberster 510|L|-|||64.5"]],
+ "EHS":[2020,2023,["1.5 PHEV 258|H|N|||37.5"]],
+ "HS":[2019,0,["1.5 T-GDi 162|E|N|||27.5","Plug-in Hybrid 258|H|N|||39.5"]],
+ "Marvel R":[2021,2023,["Marvel R 180|L|-|||42.5"]],
+ "MG ZS (2024)":[2024,0,["Hybrid+ 197|H|N|||25.9","1.5 VTi-Tech 106|E|N|||20.5"]],
+ "MG3":[2024,0,["Hybrid+ 194|H|N|||21.5"]],
+ "MG3 (ancien)":[2013,2021,["1.5 VTi-Tech 106|E|N|||13.5"]],
+ "MG4":[2022,0,["Standard 170|L|-|||29.9","Comfort 204|L|-|||34.5"]],
+ "MG5":[2021,0,["MG5 électrique 156|L|-|||33.5"]],
+ "MGS5 EV":[2025,0,["MGS5 EV 231|L|-|||36.5"]],
+ "ZS I":[2019,2024,["1.0 T-GDi 111|E|N|||21.5","ZS EV 177|L|-|||33.5","Hybrid+ 197|H|N|||27.5"]]
+},
+"Microcar":{
+ "M.Go / Dué":[2008,0,["Diesel 6 kW|D|C|60|60|13.5"]]
+},
+"Mini":{
+ "Aceman":[2024,0,["Aceman E 184|L|-|||36.5"]],
+ "Cabrio":[2004,0,["Cooper 136|E|N|||30.5","Cooper S 192|E|N|||35.5"]],
+ "Clubman":[2007,2024,["Cooper D 150|D|N|||31.5","Cooper 136|E|N|||29.5"]],
+ "Countryman (2024)":[2024,0,["Cooper C 170|E|N|||37.5","Countryman E 204|L|-|||45.5"]],
+ "Countryman R60/F60":[2010,2023,["Cooper 136|E|N|||32.5","Cooper D 150|D|N|||35.5","Cooper SE 220|H|N|||43.5"]],
+ "Mini 3 portes F56":[2014,0,["Cooper 136|E|N|||25.5","Cooper D 116|D|N|||27.5","Cooper S 192|E|N|||31.5"]],
+ "Mini 5 portes":[2014,0,["Cooper 136|E|N|||27.5","Cooper D 116|D|N|||29.5"]],
+ "Mini Electric":[2020,0,["Cooper SE 184|L|-|||37.5"]],
+ "Mini R50 / R53":[2001,2006,["Cooper 116|E|C|120|72|19.5","Cooper S 170|E|C|120|72|24.5","One D 75|D|C|180|120|20.5"]],
+ "Mini R56":[2006,2014,["Cooper 120|E|N|||22.5","Cooper D 112|D|C|180|120|24.5","Cooper S 184|E|N|||27.5"]],
+ "Paceman":[2013,2016,["Cooper D 112|D|N|||29.5"]]
+},
+"Mitsubishi":{
+ "ASX (2023)":[2023,0,["1.0 Turbo 91|E|N|||24.5","1.6 Hybride 143|H|N|||31.5"]],
+ "ASX I":[2010,2022,["1.6 117|E|N|||22.5","1.6 DI-D 114|D|C|180|120|25.5"]],
+ "Colt":[1992,2013,["1.3 95|E|N|||13.5","1.5 DI-D 95|D|C|180|120|15.5"]],
+ "Colt (2023)":[2023,0,["1.0 Turbo 91|E|N|||20.5","1.6 Hybride 143|H|N|||26.5"]],
+ "Eclipse Cross":[2018,0,["1.5 T-MIVEC 163|E|N|||28.5","PHEV 188|H|N|||43.5"]],
+ "Grandis":[2003,2011,["2.0 DI-D 136|D|C|180|120|26.5"]],
+ "i-MiEV":[2010,2016,["i-MiEV 67|L|-|||29.5"]],
+ "L200":[2006,2023,["2.5 DI-D 178|D|N|||33.5","2.2 DI-D 150|D|N|||38.5"]],
+ "Lancer":[2003,2016,["1.6 117|E|N|||19.5","2.0 DI-D 140|D|C|180|120|24.5"]],
+ "Outlander III":[2012,2021,["2.2 DI-D 150|D|C|180|120|34.5","PHEV 224|H|N|||45.5"]],
+ "Outlander PHEV (2021)":[2021,0,["2.4 PHEV 224|H|N|||48.5"]],
+ "Pajero":[1991,2019,["3.2 DI-D 200|D|N|||48.5"]],
+ "Space Star":[2013,0,["1.2 80|E|N|||13.5"]]
+},
+"Nissan":{
+ "370Z":[2009,2020,["3.7 V6 328|E|N|||42.5"]],
+ "Almera / Almera Tino":[1995,2006,["1.5 98|E|C|120|72|15.5","2.2 dCi 136|D|C|120|72|19.5"]],
+ "Ariya":[2022,0,["Ariya 63 kWh 218|L|-|||47.5"]],
+ "Interstar":[2002,0,["2.3 dCi 135|D|C|120|72|31.5"]],
+ "Juke I":[2010,2019,["1.2 DIG-T 115|E|N|||20.5","1.5 dCi 110|D|C|120|72|22.5"]],
+ "Juke II":[2019,0,["1.0 DIG-T 117|E|N|||24.5","Hybride 143|H|N|||31.5"]],
+ "Leaf":[2010,0,["Leaf 40 kWh 150|L|-|||32.5","Leaf e+ 62 kWh 217|L|-|||41.5"]],
+ "Micra K11/K12":[1992,2010,["1.0 16v 65|E|C|120|72|11.5","1.2 16v 80|E|C|120|72|12.9","1.5 dCi 82|D|C|120|72|14.5"]],
+ "Micra K13/K14":[2010,0,["1.0 IG-T 100|E|N|||17.5","1.5 dCi 90|D|C|120|72|18.5","1.2 80|E|N|||14.5"]],
+ "Murano":[2003,2015,["2.5 dCi 190|D|C|120|72|45.5"]],
+ "Navara":[2005,2021,["2.5 dCi 190|D|C|120|72|33.5","2.3 dCi 190|D|C|120|72|38.5"]],
+ "Note":[2006,2017,["1.4 88|E|N|||15.5","1.5 dCi 90|D|C|120|72|17.5","1.2 DIG-S 98|E|N|||18.5"]],
+ "NV200 / Evalia":[2010,2021,["1.5 dCi 90|D|C|120|72|20.5","e-NV200 109|L|-|||33.5"]],
+ "Pathfinder":[2005,2015,["2.5 dCi 190|D|C|120|72|42.5"]],
+ "Primera":[1996,2007,["1.8 116|E|N|||19.5","2.2 dCi 136|D|C|120|72|23.5"]],
+ "Pulsar":[2014,2018,["1.5 dCi 110|D|C|120|72|21.5","1.2 DIG-T 115|E|N|||20.5"]],
+ "Qashqai I":[2007,2013,["1.5 dCi 106|D|C|120|72|22.5","1.6 16v 117|E|N|||21.5","2.0 dCi 150|D|C|120|72|26.5"]],
+ "Qashqai II":[2013,2021,["1.2 DIG-T 115|E|N|||24.5","1.5 dCi 110|D|C|120|72|26.5","1.6 dCi 130|D|C|120|72|29.5"]],
+ "Qashqai III":[2021,0,["1.3 DIG-T 140|E|N|||31.5","e-Power 190|H|N|||39.5"]],
+ "Townstar":[2021,0,["1.3 TCe 130|E|N|||25.5","1.5 dCi 95|D|C|120|72|24.5"]],
+ "X-Trail":[2014,0,["1.6 dCi 130|D|C|120|72|32.5","e-Power 204|H|N|||44.5"]],
+ "X-Trail I/II":[2001,2014,["2.0 dCi 150|D|C|120|72|29.5","2.0 16v 141|E|N|||27.5"]]
+},
+"Omoda / Jaecoo":{
+ "Jaecoo 7":[2024,0,["1.6 TGDi 147|E|N|||32.5","Jaecoo 7 SHS 204|H|N|||38.5"]],
+ "Omoda 5":[2024,0,["1.6 TGDi 147|E|N|||28.5","Omoda E5 204|L|-|||37.5"]]
+},
+"Opel":{
+ "Adam":[2013,2019,["1.2 70|E|C|120|72|14.5","1.0 Turbo 115|E|N|||18.5"]],
+ "Agila":[2000,2015,["1.0 65|E|N|||11.5","1.2 86|E|N|||13.5"]],
+ "Antara":[2006,2015,["2.2 CDTi 163|D|N|||31.5"]],
+ "Astra G/H":[1998,2010,["1.6 16v 105|E|C|120|72|18.5","1.7 CDTi 100|D|N|||20.5","1.9 CDTi 120|D|N|||23.5"]],
+ "Astra J/K":[2009,2021,["1.4 Turbo 125|E|N|||22.5","1.6 CDTi 110|D|C|180|120|24.5","1.2 Turbo 130|E|C|100|72|25.5"]],
+ "Astra L":[2021,0,["1.2 Turbo 130|E|C|100|72|29.5","1.5 Diesel 130|D|C|180|120|31.5","Hybrid 180|H|C|100|72|39.5"]],
+ "Cascada":[2013,2019,["1.6 Turbo 170|E|N|||30.5","2.0 CDTi 165|D|N|||32.5"]],
+ "Combo":[2018,0,["1.5 Diesel 100|D|C|180|120|24.5","1.2 Turbo 110|E|C|100|72|23.5"]],
+ "Combo-e / Combo Electric":[2021,0,["Combo Electric 136|L|-|||37.5"]],
+ "Corsa B/C":[1993,2006,["1.0 12v 58|E|C|120|72|10.5","1.2 16v 75|E|C|120|72|11.9","1.3 CDTi 70|D|N|||13.5"]],
+ "Corsa D/E":[2006,2019,["1.2 16v 85|E|C|120|72|14.5","1.4 Turbo 100|E|N|||17.5","1.3 CDTi 95|D|N|||18.5"]],
+ "Corsa F":[2019,0,["1.2 75|E|C|100|72|18.5","1.2 Turbo 100|E|C|100|72|22.5","1.5 Diesel 100|D|C|180|120|23.5","Corsa-e 136|L|-|||33.5"]],
+ "Crossland":[2017,0,["1.2 Turbo 110|E|C|100|72|23.5","1.5 Diesel 110|D|C|180|120|25.5"]],
+ "Frontera":[2024,0,["1.2 Hybrid 136|H|C|100|72|26.5","Frontera Electric 113|L|-|||28.5"]],
+ "Grandland I":[2018,2024,["1.2 Turbo 130|E|C|100|72|30.5","1.5 Diesel 130|D|C|180|120|32.5","Hybrid 225|H|C|100|72|45.5"]],
+ "Grandland II":[2024,0,["1.2 Hybrid 136|H|C|100|72|35.5","Grandland Electric 213|L|-|||46.5"]],
+ "Insignia":[2008,2022,["2.0 CDTi 170|D|C|180|120|33.5","1.5 Turbo 165|E|C|100|72|32.5"]],
+ "Karl":[2015,2019,["1.0 75|E|N|||11.5"]],
+ "Meriva":[2003,2017,["1.4 Turbo 120|E|N|||19.5","1.7 CDTi 110|D|N|||21.5","1.6 CDTi 110|D|C|150|120|23.5"]],
+ "Mokka B":[2021,0,["1.2 Turbo 130|E|C|100|72|27.5","1.5 Diesel 110|D|C|180|120|28.5","Mokka-e 136|L|-|||37.5"]],
+ "Mokka X":[2016,2019,["1.4 Turbo 140|E|N|||25.5","1.6 CDTi 136|D|C|180|120|27.5"]],
+ "Movano":[2010,0,["2.3 CDTi 145|D|C|120|72|33.5","2.2 Diesel 140|D|C|180|120|35.5"]],
+ "Vivaro":[2001,0,["1.6 CDTi 125|D|C|120|72|28.5","2.0 Diesel 145|D|C|180|120|33.5","Vivaro-e 136|L|-|||46.5"]],
+ "Zafira":[1999,2019,["1.6 CDTi 136|D|C|150|120|26.5","1.7 CDTi 125|D|N|||25.5","1.4 Turbo 140|E|N|||24.5"]]
+},
+"Ora":{
+ "Funky Cat / 03":[2022,0,["Ora 03 171|L|-|||38.5"]]
+},
+"Peugeot":{
+ "106":[1991,2003,["1.1 60|E|C|120|72|9.5","1.4 75|E|C|120|72|10.9","1.5 D 58|D|C|120|72|11.5"]],
+ "107":[2005,2014,["1.0 VTi 68|E|N|||9.9"]],
+ "108":[2014,2022,["1.0 VTi 72|E|N|||11.5","1.2 PureTech 82|E|C|100|72|14.5"]],
+ "205":[1983,1998,["1.1 60|E|C|120|72|8.5","1.4 75|E|C|120|72|9.9","1.9 GTi 122|E|C|120|72|14.5","1.8 D 60|D|C|120|72|10.9"]],
+ "206":[1998,2012,["1.4 75|E|C|120|72|12.5","1.6 16v 110|E|C|120|72|15.5","1.4 HDi 70|D|C|180|120|14.5"]],
+ "207":[2006,2014,["1.4 VTi 95|E|N|||14.9","1.6 VTi 120|E|N|||17.5","1.6 HDi 92|D|C|180|120|18.5"]],
+ "208 I":[2012,2019,["1.0 VTi 68|E|N|||13.9","1.2 PureTech 82|E|C|100|72|16.5","1.2 PureTech 110|E|C|100|72|19.5","1.6 BlueHDi 100|D|C|180|120|20.5"]],
+ "208 II":[2019,0,["1.2 PureTech 75|E|C|100|72|17.5","1.2 PureTech 100|E|C|100|72|21.5","1.5 BlueHDi 100|D|C|180|120|23.5","e-208 136|L|-|||32.5"]],
+ "306":[1993,2002,["1.4 75|E|C|120|72|13.5","1.6 90|E|C|120|72|14.9","1.9 D 70|D|C|120|72|15.5","2.0 HDi 90|D|C|180|120|17.5"]],
+ "307":[2001,2008,["1.6 16v 110|E|C|120|72|17.5","2.0 HDi 110|D|C|180|120|20.5"]],
+ "308 I":[2007,2013,["1.6 VTi 120|E|N|||19.5","1.6 HDi 112|D|C|180|120|22.5"]],
+ "308 II":[2013,2021,["1.2 PureTech 110|E|C|100|72|22.5","1.2 PureTech 130|E|C|100|72|25.5","1.5 BlueHDi 130|D|C|180|120|28.9","2.0 BlueHDi 150|D|C|180|120|31.5"]],
+ "308 III":[2021,0,["1.2 PureTech 130|E|C|100|72|29.5","1.5 BlueHDi 130|D|C|180|120|31.5","Hybrid 180|H|C|100|72|39.5"]],
+ "406":[1995,2004,["1.8 16v 117|E|C|120|72|19.5","2.0 HDi 110|D|C|180|120|22.5","2.2 HDi 136|D|C|180|120|25.5"]],
+ "407":[2004,2011,["1.6 HDi 110|D|C|180|120|24.5","2.0 HDi 136|D|C|180|120|27.5","2.0 16v 140|E|C|120|72|25.5"]],
+ "408":[2022,0,["1.2 PureTech 130|E|C|100|72|33.5","Hybrid 180|H|C|100|72|42.5"]],
+ "508 I":[2011,2018,["1.6 HDi 115|D|C|180|120|28.5","2.0 HDi 140|D|C|180|120|32.5","1.6 THP 165|E|N|||31.5"]],
+ "508 II":[2018,0,["1.5 BlueHDi 130|D|C|180|120|35.5","1.6 PureTech 180|E|C|100|72|39.5","Hybrid 225|H|C|100|72|48.5"]],
+ "607":[1999,2010,["2.2 HDi 136|D|C|180|120|33.5","2.7 HDi V6 204|D|C|180|120|43.5"]],
+ "807":[2002,2014,["2.0 HDi 136|D|C|180|120|30.5"]],
+ "1007":[2005,2009,["1.4 75|E|C|120|72|15.5","1.6 16v 110|E|C|120|72|17.5"]],
+ "2008 I":[2013,2019,["1.2 PureTech 110|E|C|100|72|21.5","1.6 BlueHDi 100|D|C|180|120|23.5"]],
+ "2008 II":[2019,0,["1.2 PureTech 100|E|C|100|72|23.5","1.2 PureTech 130|E|C|100|72|27.5","1.5 BlueHDi 130|D|C|180|120|29.5","e-2008 136|L|-|||37.5"]],
+ "3008 I":[2009,2016,["1.6 THP 156|E|N|||27.5","1.6 HDi 112|D|C|180|120|28.5","2.0 HDi 150|D|C|180|120|31.5"]],
+ "3008 II":[2016,2023,["1.2 PureTech 130|E|C|100|72|29.5","1.5 BlueHDi 130|D|C|180|120|32.5","2.0 BlueHDi 180|D|C|180|120|38.5","Hybrid4 300|H|C|100|72|52.5"]],
+ "3008 III / e-3008":[2024,0,["1.2 Hybrid 136|H|C|100|72|38.5","e-3008 210|L|-|||48.5","e-3008 Long Range 230|L|-|||54.5"]],
+ "4007":[2007,2012,["2.2 HDi 156|D|C|180|120|32.5"]],
+ "4008":[2012,2017,["1.6 HDi 115|D|C|180|120|28.5"]],
+ "5008 I":[2009,2016,["1.6 HDi 112|D|C|180|120|27.5","2.0 HDi 150|D|C|180|120|31.5","1.6 THP 156|E|N|||29.5"]],
+ "5008 II":[2017,2023,["1.2 PureTech 130|E|C|100|72|32.5","1.5 BlueHDi 130|D|C|180|120|35.5","2.0 BlueHDi 180|D|C|180|120|41.5"]],
+ "5008 III":[2024,0,["1.2 Hybrid 136|H|C|100|72|41.5","e-5008 210|L|-|||51.5"]],
+ "Bipper":[2008,2017,["1.4 HDi 70|D|C|180|120|14.5"]],
+ "Boxer":[2006,0,["2.2 BlueHDi 140|D|C|180|120|33.5","2.2 BlueHDi 165|D|C|180|120|36.5"]],
+ "e-Expert / e-Traveller":[2020,0,["e-Expert 136|L|-|||48.5"]],
+ "e-Rifter":[2021,0,["e-Rifter 136|L|-|||38.5"]],
+ "Expert / Traveller":[2016,0,["1.6 BlueHDi 115|D|C|180|120|29.5","2.0 BlueHDi 180|D|C|180|120|38.5"]],
+ "iOn":[2010,2020,["iOn 67|L|-|||29.5"]],
+ "Partner / Rifter":[2008,0,["1.6 HDi 92|D|C|180|120|19.5","1.5 BlueHDi 130|D|C|180|120|26.5","1.2 PureTech 110|E|C|100|72|24.5"]],
+ "RCZ":[2010,2015,["1.6 THP 156|E|N|||29.5","2.0 HDi 163|D|C|180|120|31.5"]]
+},
+"Polestar":{
+ "Polestar 2":[2020,0,["Standard Range 272|L|-|||49.5","Long Range Dual 421|L|-|||58.5"]],
+ "Polestar 3":[2024,0,["Long Range Dual 489|L|-|||89.5"]],
+ "Polestar 4":[2024,0,["Long Range Single 272|L|-|||62.5"]]
+},
+"Porsche":{
+ "718":[2016,0,["Cayman 300|E|N|||62.5"]],
+ "911":[2004,0,["Carrera 385|E|N|||125.5"]],
+ "Boxster":[1996,0,["2.7 265|E|N|||58.5","2.5 S 350|E|N|||72.5"]],
+ "Cayenne":[2002,0,["Cayenne 340|E|N|||85.5","E-Hybrid 470|H|N|||98.5"]],
+ "Cayman":[2005,0,["2.0 300|E|N|||62.5","4.0 GTS 400|E|N|||98.5"]],
+ "Macan":[2014,0,["Macan 265|E|N|||68.5","Macan S 354|E|N|||82.5"]],
+ "Macan Electric":[2024,0,["Macan 4 408|L|-|||88.5"]],
+ "Panamera":[2009,0,["4 E-Hybrid 462|H|N|||112.5","Diesel 300|D|N|||95.5"]],
+ "Taycan":[2020,0,["Taycan 408|L|-|||95.5"]]
+},
+"Renault":{
+ "4 E-Tech":[2025,0,["R4 52 kWh 150|L|-|||30.0"]],
+ "5 E-Tech":[2024,0,["R5 40 kWh 120|L|-|||25.0","R5 52 kWh 150|L|-|||30.9"]],
+ "Alaskan":[2017,2020,["2.3 dCi 190|D|C|120|72|39.5"]],
+ "Arkana":[2021,0,["1.3 TCe 140|E|N|||30.5","E-Tech 145|H|N|||33.9"]],
+ "Austral":[2022,0,["1.2 E-Tech 200|H|N|||38.5","1.3 TCe 140 mild hybrid|E|N|||34.5"]],
+ "Captur I":[2013,2019,["0.9 TCe 90|E|N|||18.9","1.2 TCe 120|E|N|||22.5","1.5 dCi 90|D|C|120|72|21.9"]],
+ "Captur II":[2019,0,["1.0 TCe 90|E|N|||21.5","1.3 TCe 140|E|N|||26.5","1.5 Blue dCi 115|D|C|120|72|26.9","E-Tech 145|H|N|||30.5"]],
+ "Clio I":[1990,1998,["1.2 60|E|C|120|72|9.5","1.4 80|E|C|120|72|11.5","1.9 D 65|D|C|120|72|11.9"]],
+ "Clio II":[1998,2006,["1.2 16v 75|E|C|120|72|11.5","1.4 16v 98|E|C|120|72|13.5","1.5 dCi 65|D|C|120|72|13.9","1.5 dCi 85|D|C|120|72|14.9"]],
+ "Clio III":[2005,2012,["1.2 16v 75|E|C|120|72|13.5","1.5 dCi 85|D|C|120|72|16.5","1.6 16v 110|E|C|120|72|17.5"]],
+ "Clio IV":[2012,2019,["0.9 TCe 90|E|N|||16.5","1.2 TCe 120|E|N|||19.5","1.5 dCi 90|D|C|120|72|18.9"]],
+ "Clio V":[2019,0,["1.0 SCe 65|E|N|||15.9","1.0 TCe 90|E|N|||19.5","1.5 Blue dCi 100|D|C|120|72|21.5","E-Tech 145|H|N|||25.9"]],
+ "Espace IV":[2002,2014,["2.0 dCi 150|D|C|120|72|31.5","2.0 Turbo 170|E|C|120|72|30.5"]],
+ "Espace V":[2015,2023,["1.6 dCi 160|D|C|120|72|38.5","1.8 TCe 225|E|N|||42.5"]],
+ "Espace VI":[2023,0,["1.2 E-Tech 200|H|N|||47.5"]],
+ "Fluence":[2010,2016,["1.5 dCi 110|D|C|120|72|21.5","1.6 16v 110|E|C|120|72|20.5"]],
+ "Grand Scénic III":[2009,2016,["1.5 dCi 110|D|C|120|72|25.5","1.6 dCi 130|D|C|120|72|28.5","1.2 TCe 130|E|N|||26.5"]],
+ "Grand Scénic IV":[2016,2022,["1.3 TCe 140|E|N|||29.5","1.5 Blue dCi 120|D|C|120|72|30.5"]],
+ "Kadjar":[2015,2022,["1.3 TCe 140|E|N|||27.5","1.5 Blue dCi 115|D|C|120|72|28.5"]],
+ "Kangoo I":[1997,2008,["1.5 dCi 85|D|C|120|72|14.5","1.6 16v 95|E|C|120|72|14.9"]],
+ "Kangoo II":[2008,2021,["1.5 dCi 90|D|C|120|72|18.5","1.2 TCe 115|E|N|||19.5"]],
+ "Kangoo III":[2021,0,["1.3 TCe 130|E|N|||24.5","1.5 Blue dCi 115|D|C|120|72|25.5","E-Tech 90|L|-|||38.5"]],
+ "Koleos I":[2008,2015,["2.0 dCi 150|D|C|120|72|30.5"]],
+ "Koleos II":[2017,2022,["1.6 dCi 130|D|C|120|72|32.5","2.0 dCi 175|D|C|120|72|38.5"]],
+ "Laguna II":[2001,2007,["1.8 16v 120|E|C|120|72|21.5","1.9 dCi 120|D|C|120|72|23.5","2.0 dCi 150|D|C|120|72|26.5"]],
+ "Laguna III":[2007,2015,["1.5 dCi 110|D|C|120|72|24.5","2.0 dCi 150|D|C|120|72|29.5"]],
+ "Latitude":[2011,2015,["2.0 dCi 150|D|C|120|72|30.5"]],
+ "Master II":[1997,2010,["2.5 dCi 120|D|C|120|72|26.5","2.2 dCi 90|D|C|120|72|24.5"]],
+ "Master III":[2010,0,["2.3 dCi 135|D|C|120|72|30.5","2.3 Blue dCi 150|D|C|120|72|34.5"]],
+ "Mégane E-Tech électrique":[2022,0,["EV40 130|L|-|||37.5","EV60 220|L|-|||42.5"]],
+ "Mégane I":[1995,2002,["1.4 16v 95|E|C|120|72|14.5","1.6 16v 107|E|C|120|72|16.5","1.9 dTi 80|D|C|120|72|16.9"]],
+ "Mégane II":[2002,2008,["1.4 16v 98|E|C|120|72|16.5","1.6 16v 110|E|C|120|72|18.5","1.5 dCi 105|D|C|120|72|19.5","1.9 dCi 130|D|C|120|72|22.5"]],
+ "Mégane III":[2008,2016,["1.6 16v 110|E|C|120|72|19.5","1.5 dCi 110|D|C|120|72|22.5","1.2 TCe 130|E|N|||22.9"]],
+ "Mégane IV":[2016,2022,["1.3 TCe 140|E|N|||25.5","1.5 Blue dCi 115|D|C|120|72|26.5","1.6 E-Tech 160|H|N|||33.5"]],
+ "Modus / Grand Modus":[2004,2012,["1.2 16v 75|E|C|120|72|13.5","1.5 dCi 85|D|C|120|72|15.5"]],
+ "Rafale":[2024,0,["1.2 E-Tech 200|H|N|||43.5"]],
+ "Scénic E-Tech":[2024,0,["EV60 170|L|-|||41.5","EV87 220|L|-|||46.5"]],
+ "Scénic I":[1996,2003,["1.6 16v 107|E|C|120|72|17.5","1.9 dTi 100|D|C|120|72|19.5"]],
+ "Scénic II":[2003,2009,["1.6 16v 110|E|C|120|72|19.5","1.5 dCi 105|D|C|120|72|21.5","1.9 dCi 130|D|C|120|72|24.5"]],
+ "Scénic III":[2009,2016,["1.5 dCi 110|D|C|120|72|24.5","1.2 TCe 130|E|N|||24.9"]],
+ "Scénic IV":[2016,2022,["1.3 TCe 140|E|N|||28.5","1.5 Blue dCi 120|D|C|120|72|29.5"]],
+ "Symbioz":[2024,0,["1.6 E-Tech 145|H|N|||32.5"]],
+ "Talisman":[2015,2022,["1.5 dCi 110|D|C|120|72|29.5","1.6 dCi 160|D|C|120|72|35.5","1.3 TCe 160|E|N|||33.5"]],
+ "Trafic II":[2001,2014,["1.9 dCi 100|D|C|120|72|22.5","2.0 dCi 115|D|C|120|72|25.5"]],
+ "Trafic III":[2014,0,["1.6 dCi 120|D|C|120|72|27.5","2.0 Blue dCi 150|D|C|120|72|32.5"]],
+ "Twingo I":[1993,2007,["1.2 60|E|C|120|72|8.5","1.2 16v 75|E|C|120|72|9.9"]],
+ "Twingo II":[2007,2014,["1.2 16v 75|E|C|120|72|11.5","1.5 dCi 75|D|C|120|72|13.5"]],
+ "Twingo III":[2014,2024,["1.0 SCe 70|E|N|||11.9","0.9 TCe 90|E|N|||14.5","Twingo E-Tech 82|L|-|||24.5"]],
+ "Vel Satis":[2002,2009,["2.2 dCi 150|D|C|120|72|38.5","3.0 dCi 180|D|N|||45.5"]],
+ "Wind":[2010,2013,["1.2 TCe 100|E|N|||17.5"]],
+ "Zoe":[2012,2024,["Q90 / R110|L|-|||25.9","R135 ZE50|L|-|||32.5"]]
+},
+"Saab":{
+ "9-3":[1998,2012,["1.9 TiD 150|D|C|180|120|28.5","2.0 T 175|E|C|120|72|29.5"]],
+ "9-5":[1997,2012,["1.9 TiD 150|D|C|180|120|33.5","2.0 T 150|E|C|120|72|32.5"]]
+},
+"Seat":{
+ "Alhambra":[1996,2020,["2.0 TDI 140|D|C|180|96|32.5","1.4 TSI 150|E|C|180|84|31.5"]],
+ "Altea":[2004,2015,["1.6 102|E|C|120|72|19.5","1.9 TDI 105|D|C|120|96|21.5"]],
+ "Arona":[2017,0,["1.0 TSI 110|E|C|180|84|22.5","1.5 TSI 150|E|C|180|84|27.5"]],
+ "Arosa":[1997,2004,["1.0 50|E|C|120|72|9.5","1.4 TDI 75|D|C|180|96|11.5"]],
+ "Ateca":[2016,0,["1.5 TSI 150|E|C|180|84|30.5","2.0 TDI 150|D|C|180|96|34.5"]],
+ "Exeo":[2008,2013,["2.0 TDI 143|D|C|180|96|26.5"]],
+ "Ibiza III":[2002,2008,["1.4 16v 75|E|C|120|72|13.5","1.9 TDI 100|D|C|120|96|15.5"]],
+ "Ibiza IV":[2008,2017,["1.2 TSI 90|E|C|180|84|15.5","1.6 TDI 90|D|C|180|96|17.5"]],
+ "Ibiza V":[2017,0,["1.0 TSI 95|E|C|180|84|17.5","1.0 TSI 110|E|C|180|84|20.5","1.6 TDI 95|D|C|180|96|21.5"]],
+ "Leon I":[1999,2006,["1.6 16v 105|E|C|120|72|17.5","1.9 TDI 110|D|C|120|96|19.5"]],
+ "Leon II":[2005,2012,["1.4 TSI 125|E|N|||20.5","1.9 TDI 105|D|C|120|96|21.5","2.0 TDI 140|D|C|180|96|24.5"]],
+ "Leon III":[2012,2020,["1.2 TSI 110|E|C|180|84|22.5","1.6 TDI 115|D|C|180|96|25.5","2.0 TDI 150|D|C|180|96|28.5"]],
+ "Leon IV":[2020,0,["1.0 TSI 110|E|C|180|84|26.5","1.5 TSI 150|E|C|180|84|29.5","2.0 TDI 150|D|C|180|96|32.5"]],
+ "Mii":[2012,2021,["1.0 60|E|C|180|84|10.5","Mii electric 83|L|-|||21.5"]],
+ "Tarraco":[2018,0,["1.5 TSI 150|E|C|180|84|36.5","2.0 TDI 150|D|C|180|96|39.5"]],
+ "Toledo":[1991,2019,["1.2 TSI 105|E|C|180|84|17.5","1.6 TDI 105|D|C|180|96|19.5"]]
+},
+"Skoda":{
+ "Citigo":[2012,2020,["1.0 60|E|C|180|84|10.5","Citigo-e iV 83|L|-|||21.5"]],
+ "Elroq":[2024,0,["Elroq 60 204|L|-|||38.5","Elroq 85 286|L|-|||45.5"]],
+ "Enyaq":[2021,0,["Enyaq 60 179|L|-|||45.5","Enyaq 85 286|L|-|||52.5"]],
+ "Enyaq Coupé":[2021,0,["Enyaq Coupé 85 286|L|-|||55.5"]],
+ "Fabia I":[1999,2007,["1.2 12v 64|E|N|||11.5","1.4 16v 75|E|C|120|72|12.5","1.9 TDI 100|D|C|120|96|14.5"]],
+ "Fabia II":[2007,2014,["1.2 TSI 86|E|C|180|84|14.5","1.6 TDI 90|D|C|180|96|16.5"]],
+ "Fabia III":[2014,2021,["1.0 TSI 95|E|C|180|84|17.5","1.0 MPI 75|E|C|180|84|14.5"]],
+ "Fabia IV":[2021,0,["1.0 TSI 95|E|C|180|84|20.5","1.0 TSI 110|E|C|180|84|23.5"]],
+ "Kamiq":[2019,0,["1.0 TSI 110|E|C|180|84|24.5","1.5 TSI 150|E|C|180|84|28.5"]],
+ "Karoq":[2017,0,["1.0 TSI 110|E|C|180|84|28.5","2.0 TDI 150|D|C|180|96|34.5"]],
+ "Kodiaq":[2016,0,["1.5 TSI 150|E|C|180|84|36.5","2.0 TDI 150|D|C|180|96|39.5"]],
+ "Octavia I":[1996,2010,["1.6 102|E|C|120|72|17.5","1.9 TDI 105|D|C|120|96|19.5"]],
+ "Octavia II":[2004,2013,["1.6 102|E|C|120|72|19.5","1.9 TDI 105|D|C|120|96|22.5","2.0 TDI 140|D|C|180|96|25.5"]],
+ "Octavia III":[2013,2020,["1.0 TSI 115|E|C|180|84|23.5","1.6 TDI 115|D|C|180|96|25.5","2.0 TDI 150|D|C|180|96|29.5"]],
+ "Octavia IV":[2020,0,["1.0 TSI 110|E|C|180|84|27.5","1.5 TSI 150|E|C|180|84|30.5","2.0 TDI 150|D|C|180|96|33.5"]],
+ "Rapid / Rapid Spaceback":[2012,2019,["1.2 TSI 105|E|C|180|84|18.5","1.6 TDI 90|D|C|180|96|20.5"]],
+ "Roomster":[2006,2015,["1.2 TSI 105|E|C|180|84|17.5","1.6 TDI 90|D|C|180|96|19.5"]],
+ "Scala":[2019,0,["1.0 TSI 110|E|C|180|84|23.5","1.5 TSI 150|E|C|180|84|27.5"]],
+ "Superb":[2008,0,["2.0 TDI 150|D|C|180|96|36.5","1.5 TSI 150|E|C|180|84|34.5"]],
+ "Superb I/II":[2001,2015,["2.0 TDI 140|D|C|180|96|30.5","1.8 TSI 160|E|N|||31.5"]],
+ "Yeti":[2009,2017,["1.2 TSI 105|E|C|180|84|22.5","2.0 TDI 110|D|C|180|96|25.5","2.0 TDI 150|D|C|180|96|28.5"]]
+},
+"Smart":{
+ "Forfour":[2014,2021,["1.0 71|E|N|||13.5","EQ forfour 82|L|-|||23.5"]],
+ "Fortwo II":[2007,2014,["1.0 71|E|N|||11.5","0.8 cdi 54|D|C|180|120|13.5"]],
+ "Fortwo III":[2014,2024,["0.9 Turbo 90|E|N|||14.5","EQ fortwo 82|L|-|||22.5"]],
+ "Roadster":[2003,2006,["0.7 Turbo 82|E|N|||18.5"]],
+ "Smart #1":[2023,0,["#1 Pro+ 272|L|-|||41.5"]],
+ "Smart #3":[2023,0,["#3 Pro+ 272|L|-|||44.5"]]
+},
+"SsangYong / KGM":{
+ "Korando":[1997,0,["1.6 e-XDi 136|D|C|180|120|29.5","Korando e-Motion 190|L|-|||42.5"]],
+ "Musso":[2018,0,["2.2 e-XDi 202|D|C|180|120|38.5"]],
+ "Rexton":[2001,0,["2.2 e-XDi 202|D|C|180|120|45.5"]],
+ "Tivoli":[2015,0,["1.6 e-XDi 115|D|C|180|120|22.5","1.2 GDi 128|E|N|||21.5"]],
+ "Torres":[2023,0,["1.5 GDi-T 163|E|N|||36.5","Torres EVX 207|L|-|||46.5"]]
+},
+"Subaru":{
+ "BRZ":[2012,0,["2.0 200|E|C|120|72|32.5","2.4 234|E|N|||38.5"]],
+ "Forester":[2008,0,["2.0i e-Boxer 150|H|N|||38.5","2.0 D 147|D|C|180|120|36.5"]],
+ "Forester (ancien)":[1997,2008,["2.0 16v 125|E|C|120|72|27.5","2.0 D 147|D|C|180|120|31.5"]],
+ "Impreza":[1992,0,["2.0 16v 150|E|C|120|72|24.5","2.0 e-Boxer 150|H|N|||31.5","2.5 WRX STI 300|E|C|120|72|42.5"]],
+ "Legacy":[1994,2018,["2.0 D 150|D|C|180|120|33.5","2.5 16v 167|E|C|120|72|32.5"]],
+ "Levorg":[2015,2021,["1.6 GT 170|E|N|||34.5"]],
+ "Outback":[2009,0,["2.5i 169|E|N|||45.5","2.0 D 150|D|C|180|120|43.5"]],
+ "Solterra":[2022,0,["Solterra 218|L|-|||52.5"]],
+ "XV / Crosstrek":[2012,0,["1.6i 114|E|N|||27.5","2.0i e-Boxer 150|H|N|||32.5"]]
+},
+"Suzuki":{
+ "Across":[2020,2023,["2.5 PHEV 306|H|N|||52.5"]],
+ "Alto":[2002,2015,["1.0 68|E|N|||9.5"]],
+ "Baleno":[2016,2019,["1.2 Dualjet 90|E|N|||15.5","1.0 Boosterjet 111|E|N|||17.5"]],
+ "Celerio":[2014,2019,["1.0 68|E|N|||10.9"]],
+ "Grand Vitara":[1998,2015,["1.9 DDiS 129|D|C|180|120|26.5","2.4 VVT 169|E|N|||28.5"]],
+ "Ignis":[2016,0,["1.2 Dualjet Hybrid 83|E|N|||17.5"]],
+ "Jimny":[1998,0,["1.5 VVT 102|E|N|||21.5"]],
+ "S-Cross":[2013,0,["1.4 Boosterjet Hybrid 129|E|N|||27.5"]],
+ "Splash":[2008,2014,["1.0 65|E|N|||11.5","1.2 86|E|C|120|72|13.5"]],
+ "Swace":[2020,0,["1.8 Hybride 122|H|N|||28.5"]],
+ "Swift IV/V/VI":[2010,2023,["1.2 Dualjet 90|E|N|||16.5","1.0 Boosterjet 111|E|N|||19.5","1.2 Hybrid 83|E|N|||18.5"]],
+ "Swift VII":[2024,0,["1.2 Hybrid 83|E|N|||19.5"]],
+ "SX4":[2006,2013,["1.6 120|E|C|120|72|17.5","1.9 DDiS 120|D|C|180|120|19.5"]],
+ "SX4 S-Cross":[2013,2021,["1.6 DDiS 120|D|C|180|120|23.5","1.0 Boosterjet 111|E|N|||22.5"]],
+ "Vitara":[2015,0,["1.4 Boosterjet 129|E|N|||24.5","1.6 VVT 120|E|N|||22.5","1.5 Full Hybrid 115|E|N|||27.5"]]
+},
+"Tesla":{
+ "Model 3 (2019-2023)":[2019,2023,["Propulsion 283|L|-|||43.5","Grande Autonomie 498|L|-|||52.5"]],
+ "Model 3 Highland":[2023,0,["Propulsion 283|L|-|||42.9","Grande Autonomie 498|L|-|||50.9"]],
+ "Model S":[2013,0,["Grande Autonomie 670|L|-|||99.5"]],
+ "Model X":[2016,0,["Grande Autonomie 670|L|-|||109.5"]],
+ "Model Y (2021-2024)":[2021,2024,["Propulsion 299|L|-|||45.5","Grande Autonomie 514|L|-|||54.5"]],
+ "Model Y Juniper":[2025,0,["Propulsion 299|L|-|||44.9","Grande Autonomie 514|L|-|||52.9"]]
+},
+"Toyota":{
+ "Auris":[2007,2018,["1.33 VVT-i 99|E|N|||18.5","1.4 D-4D 90|D|N|||20.5","Hybride 136|H|N|||24.5"]],
+ "Avensis":[1997,2018,["1.6 VVT-i 132|E|N|||24.5","2.0 D-4D 124|D|N|||27.5","2.2 D-4D 150|D|N|||30.5"]],
+ "Aygo":[2005,2022,["1.0 VVT-i 72|E|N|||10.9"]],
+ "Aygo I":[2005,2014,["1.0 VVT-i 68|E|N|||9.9","1.4 HDi 54|D|C|180|120|11.5"]],
+ "Aygo X":[2022,0,["1.0 VVT-i 72|E|N|||16.5"]],
+ "bZ4X":[2022,0,["bZ4X 204|L|-|||47.5"]],
+ "C-HR I":[2016,2023,["1.8 Hybride 122|H|N|||29.5","2.0 Hybride 184|H|N|||34.5"]],
+ "C-HR II":[2023,0,["1.8 Hybride 140|H|N|||34.5","2.0 Hybride 198|H|N|||39.5"]],
+ "C-HR PHEV":[2024,0,["2.0 Hybride rechargeable 223|H|N|||46.5"]],
+ "Camry":[2019,2023,["2.5 Hybride 218|H|N|||39.5"]],
+ "Corolla Cross":[2022,0,["2.0 Hybride 197|H|N|||35.5"]],
+ "Corolla E12/E15":[2002,2013,["1.4 VVT-i 97|E|N|||17.5","1.4 D-4D 90|D|N|||19.5","2.0 D-4D 126|D|N|||22.5"]],
+ "Corolla Verso":[2004,2009,["1.8 VVT-i 129|E|N|||21.5","2.2 D-4D 136|D|N|||24.5"]],
+ "Corolla XII":[2019,0,["1.8 Hybride 122|H|N|||28.5","2.0 Hybride 184|H|N|||33.5","1.2 Turbo 116|E|N|||25.5"]],
+ "GR Yaris":[2020,0,["1.6 Turbo 261|E|N|||38.5","1.6 Turbo 280|E|N|||45.5"]],
+ "Hilux":[2005,0,["2.5 D-4D 144|D|N|||32.5","2.4 D-4D 150|D|N|||38.5","2.8 D-4D 204|D|N|||45.5"]],
+ "iQ":[2009,2015,["1.0 VVT-i 68|E|N|||13.5"]],
+ "Land Cruiser":[2002,0,["3.0 D-4D 173|D|N|||55.5","2.8 D-4D 204|D|N|||72.5"]],
+ "Prius":[2009,0,["1.8 Hybride 122|H|N|||30.5","Hybride rechargeable 223|H|N|||42.5"]],
+ "Prius+":[2012,2021,["1.8 Hybride 136|H|N|||32.5"]],
+ "Proace":[2016,0,["1.5 D-4D 120|D|C|180|120|29.5","2.0 D-4D 180|D|C|180|120|37.5"]],
+ "Proace City":[2019,0,["1.5 D-4D 100|D|C|180|120|24.5","1.2 Turbo 110|E|C|100|72|23.5","Proace City Electric 136|L|-|||37.5"]],
+ "RAV4 III/IV":[2006,2018,["2.0 D-4D 124|D|N|||31.5","2.2 D-4D 150|D|N|||34.5","2.5 Hybride 197|H|N|||36.5"]],
+ "RAV4 V":[2019,0,["2.5 Hybride 218|H|N|||40.5","Hybride rechargeable 306|H|N|||55.5"]],
+ "Supra":[2019,0,["2.0 Turbo 258|E|N|||58.5","3.0 Turbo 340|E|N|||72.5"]],
+ "Urban Cruiser":[2009,2014,["1.33 VVT-i 101|E|N|||17.5","1.4 D-4D 90|D|N|||19.5"]],
+ "Urban Cruiser électrique":[2025,0,["Urban Cruiser BEV 174|L|-|||36.5"]],
+ "Verso":[2009,2018,["1.6 D-4D 112|D|N|||24.5","1.8 VVT-i 147|E|N|||25.5"]],
+ "Yaris Cross":[2021,0,["Hybride 116|H|N|||27.5","Hybride 130|H|N|||31.5"]],
+ "Yaris I":[1999,2005,["1.0 VVT-i 65|E|N|||11.5","1.4 D-4D 75|D|N|||13.5"]],
+ "Yaris II":[2005,2011,["1.0 VVT-i 69|E|N|||12.5","1.33 VVT-i 101|E|N|||14.5","1.4 D-4D 90|D|N|||15.9"]],
+ "Yaris III":[2011,2020,["1.0 VVT-i 69|E|N|||13.9","1.33 VVT-i 99|E|N|||16.5","Hybride 100|H|N|||19.5"]],
+ "Yaris IV":[2020,0,["1.5 VVT-iE 125|E|N|||21.5","Hybride 116|H|N|||25.5","Hybride 130|H|N|||28.5"]]
+},
+"Volkswagen":{
+ "Amarok":[2010,0,["2.0 TDI 180|D|C|180|96|42.5","3.0 TDI V6 258|D|N|||55.5"]],
+ "Arteon":[2017,2023,["2.0 TDI 150|D|C|180|96|44.5","2.0 TSI 190|E|N|||46.5"]],
+ "Beetle / Coccinelle":[1998,2019,["1.6 102|E|C|120|72|19.5","1.2 TSI 105|E|C|180|84|22.5","2.0 TDI 140|D|C|180|96|26.5"]],
+ "Bora":[1998,2005,["1.6 16v 105|E|C|120|72|19.5","1.9 TDI 130|D|C|120|96|22.5"]],
+ "Caddy":[2004,0,["2.0 TDI 102|D|C|180|96|24.5","1.5 TSI 114|E|C|180|84|26.5"]],
+ "Crafter":[2006,0,["2.0 TDI 140|D|C|180|96|38.5","2.0 TDI 177|D|C|180|96|43.5"]],
+ "Eos":[2006,2015,["2.0 TDI 140|D|C|180|96|32.5","1.4 TSI 160|E|N|||31.5"]],
+ "Fox":[2005,2011,["1.2 55|E|C|120|72|10.5","1.4 75|E|C|120|72|11.5"]],
+ "Golf IV":[1997,2003,["1.4 16v 75|E|C|120|72|16.5","1.6 16v 105|E|C|120|72|18.5","1.9 TDI 110|D|C|120|96|20.5"]],
+ "Golf Sportsvan":[2014,2020,["1.2 TSI 110|E|C|180|84|24.5","1.6 TDI 115|D|C|180|96|26.5"]],
+ "Golf V":[2003,2008,["1.4 16v 80|E|C|120|72|18.5","1.4 TSI 140|E|N|||23.5","1.9 TDI 105|D|C|120|96|22.5","2.0 TDI 140|D|C|120|96|25.5"]],
+ "Golf VI":[2008,2012,["1.4 TSI 122|E|N|||21.5","1.6 TDI 105|D|C|180|96|23.5","2.0 TDI 140|D|C|180|96|26.5"]],
+ "Golf VII":[2012,2020,["1.2 TSI 105|E|C|180|84|22.5","1.4 TSI 125|E|C|180|84|25.5","1.6 TDI 115|D|C|180|96|26.5","2.0 TDI 150|D|C|180|96|29.5"]],
+ "Golf VIII":[2020,0,["1.0 TSI 110|E|C|180|84|26.5","1.5 TSI 130|E|C|180|84|29.5","2.0 TDI 150|D|C|180|96|33.5","eTSI 150|E|C|180|84|34.5"]],
+ "ID. Buzz":[2022,0,["Pro 204|L|-|||58.5","GTX 340|L|-|||72.5"]],
+ "ID.3":[2020,0,["Pro Performance 204|L|-|||39.9","Pro S 204|L|-|||46.5"]],
+ "ID.4":[2021,0,["Pro Performance 204|L|-|||46.5","GTX 299|L|-|||56.5"]],
+ "ID.5":[2021,0,["Pro Performance 204|L|-|||50.5","GTX 299|L|-|||58.5"]],
+ "ID.7":[2023,0,["Pro 286|L|-|||57.5"]],
+ "Jetta":[2005,2018,["1.4 TSI 122|E|C|180|84|22.5","1.6 TDI 105|D|C|180|96|23.5"]],
+ "Lupo":[1998,2005,["1.0 50|E|C|120|72|9.5","1.4 TDI 75|D|C|180|96|11.5"]],
+ "Multivan / California":[2003,0,["2.0 TDI 150|D|C|180|96|52.5","2.0 TDI 204|D|C|180|96|62.5","eHybrid 218|H|C|180|84|68.5"]],
+ "Passat B6":[2005,2010,["1.9 TDI 105|D|C|120|96|26.5","2.0 TDI 140|D|C|180|96|29.5","1.8 TSI 160|E|N|||30.5"]],
+ "Passat B7":[2010,2014,["1.6 TDI 105|D|C|180|96|29.5","2.0 TDI 140|D|C|180|96|32.5"]],
+ "Passat B8":[2014,2023,["1.5 TSI 150|E|C|180|84|33.5","2.0 TDI 150|D|C|180|96|36.5","GTE 218|H|C|180|84|46.5"]],
+ "Passat B9":[2024,0,["1.5 eTSI 150|E|C|180|84|42.5","2.0 TDI 150|D|C|180|96|45.5","eHybrid 204|H|C|180|84|52.5"]],
+ "Polo III":[1994,2001,["1.4 60|E|C|120|72|12.5","1.9 SDI 64|D|C|120|96|13.5"]],
+ "Polo IV":[2001,2009,["1.2 12v 64|E|N|||13.5","1.4 16v 80|E|C|120|72|14.5","1.4 TDI 80|D|C|180|96|15.5"]],
+ "Polo V":[2009,2017,["1.2 TSI 90|E|C|180|84|16.5","1.6 TDI 90|D|C|180|96|18.5","1.4 TDI 75|D|C|180|96|17.5"]],
+ "Polo VI":[2017,0,["1.0 TSI 95|E|C|180|84|19.5","1.0 TSI 110|E|C|180|84|22.5","1.6 TDI 95|D|C|180|96|23.5"]],
+ "Scirocco":[2008,2017,["1.4 TSI 160|E|N|||25.5","2.0 TDI 140|D|C|180|96|28.5","2.0 TSI 210|E|N|||33.5"]],
+ "Sharan":[1995,2022,["2.0 TDI 140|D|C|180|96|33.5","1.4 TSI 150|E|C|180|84|32.5"]],
+ "T-Cross":[2019,0,["1.0 TSI 95|E|C|180|84|21.5","1.0 TSI 110|E|C|180|84|24.5","1.6 TDI 95|D|C|180|96|25.5"]],
+ "T-Roc":[2017,0,["1.0 TSI 110|E|C|180|84|25.5","1.5 TSI 150|E|C|180|84|29.5","2.0 TDI 150|D|C|180|96|33.5"]],
+ "T-Roc Cabriolet":[2020,0,["1.0 TSI 110|E|C|180|84|29.5","1.5 TSI 150|E|C|180|84|33.5"]],
+ "Taigo":[2021,0,["1.0 TSI 95|E|C|180|84|23.5","1.0 TSI 110|E|C|180|84|26.5"]],
+ "Tiguan Allspace":[2017,2023,["1.5 TSI 150|E|C|180|84|36.5","2.0 TDI 150|D|C|180|96|39.5"]],
+ "Tiguan I":[2007,2016,["1.4 TSI 150|E|C|180|84|28.5","2.0 TDI 140|D|C|180|96|31.5"]],
+ "Tiguan II":[2016,2023,["1.5 TSI 150|E|C|180|84|32.5","2.0 TDI 150|D|C|180|96|36.5","eHybrid 245|H|C|180|84|48.5"]],
+ "Tiguan III":[2024,0,["1.5 eTSI 150|E|C|180|84|38.5","2.0 TDI 150|D|C|180|96|41.5"]],
+ "Touareg":[2002,0,["3.0 TDI V6 231|D|N|||68.5","3.0 TDI V6 286|D|N|||78.5"]],
+ "Touran":[2003,0,["1.6 TDI 115|D|C|180|96|29.5","1.5 TSI 150|E|C|180|84|31.5"]],
+ "Transporter T6":[2015,0,["2.0 TDI 102|D|C|180|96|32.5","2.0 TDI 150|D|C|180|96|38.5"]],
+ "Up":[2011,2023,["1.0 MPI 60|E|C|180|84|10.9","e-up 83|L|-|||23.5"]]
+},
+"Volvo":{
+ "C30":[2006,2013,["1.6 D 109|D|C|150|120|24.5","2.0 D 136|D|C|150|120|27.5"]],
+ "C40 Recharge":[2021,0,["Single Motor 238|L|-|||52.5","Twin Motor 408|L|-|||62.5"]],
+ "EX30":[2024,0,["EX30 Single Motor 272|L|-|||37.5"]],
+ "EX40":[2024,0,["EX40 Single Motor 238|L|-|||50.5"]],
+ "EX90":[2024,0,["EX90 Twin Motor 408|L|-|||105.5"]],
+ "S40 / V50":[2004,2012,["1.6 D 110|D|C|150|120|24.5","2.0 D 136|D|C|150|120|27.5","1.8 125|E|C|150|120|26.5"]],
+ "S60 / V60 (2010)":[2010,2018,["D2 115|D|C|150|120|33.5","D4 190|D|C|150|120|38.5","T4 190|E|C|150|120|37.5"]],
+ "S80":[1998,2016,["D3 163|D|C|150|120|42.5","D5 205|D|C|150|120|48.5"]],
+ "V40":[2012,2019,["D2 120|D|C|150|120|28.5","T3 152|E|C|150|120|30.5"]],
+ "V60":[2010,0,["B4 197|E|C|150|120|45.5","D4 190|D|C|150|120|43.5"]],
+ "V70 / XC70":[2000,2016,["2.0 D3 163|D|C|150|120|38.5","2.4 D5 205|D|C|150|120|45.5"]],
+ "V90 / S90":[2016,0,["D4 190|D|C|150|120|52.5","B4 197|E|C|150|120|55.5","T8 Recharge 392|H|C|150|120|72.5"]],
+ "XC40":[2017,0,["B3 163|E|C|150|120|38.5","B4 197|E|C|150|120|43.5","EX40 / Recharge 238|L|-|||49.5"]],
+ "XC60":[2008,0,["B4 197|E|C|150|120|52.5","T6 Recharge 350|H|C|150|120|68.5"]],
+ "XC90":[2015,0,["B5 250|E|C|150|120|68.5","T8 Recharge 455|H|C|150|120|82.5"]]
+},
+"Xpeng":{
+ "G6":[2024,0,["G6 RWD Long Range 286|L|-|||48.5"]],
+ "G9":[2024,0,["G9 RWD Long Range 313|L|-|||62.5"]],
+ "P7":[2024,0,["P7 Long Range 275|L|-|||52.5"]]
+}
+};
+
+/* ---------- lecture du catalogue ---------- */
+const ENERGIE_CODE = { E:"essence", D:"diesel", H:"hybride", L:"electrique" };
+function moto(s){
+  const p = String(s).split("|");
+  return { n:p[0],
+    energie: ENERGIE_CODE[p[1]] || "essence",
+    distrib: p[2] === "C" ? "courroie" : p[2] === "N" ? "chaine" : "inconnu",
+    dk: p[3] ? parseInt(p[3],10) * 1000 : 0,
+    dm: p[4] ? parseInt(p[4],10) : 0,
+    prix: p[5] ? Math.round(parseFloat(p[5]) * 100000) : 0 };
+}
+const MARQUES = Object.keys(CAT).sort((a,b) => a.localeCompare(b,"fr"));
+const NB_MODELES = MARQUES.reduce((s,m) => s + Object.keys(CAT[m]).length, 0);
+function modelesDe(m){ return CAT[m] ? Object.keys(CAT[m]) : []; }
+function motosDe(m, mo){ const e = CAT[m] && CAT[m][mo]; return e ? e[2].map(moto) : []; }
+function anneesDe(m, mo){
+  const e = CAT[m] && CAT[m][mo];
+  if(!e) return null;
+  return [e[0], e[1] || new Date().getFullYear()];
+}
+function libAnnees(m, mo){
+  const a = anneesDe(m, mo);
+  if(!a) return "";
+  const e = CAT[m][mo];
+  return a[0] + " – " + (e[1] ? e[1] : "");
+}
+/* Recherche tolérante : accents, ponctuation et ordre des mots indifférents,
+   « 308 peugeot » trouve la même chose que « peugeot 308 ». */
+function normTexte(s){
+  return String(s||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+    .replace(/[^a-z0-9]+/g," ").trim();
+}
+function chercherModele(q){
+  const toks = normTexte(q).split(" ").filter(Boolean);
+  if(!toks.length) return [];
+  const r = [];
+  MARQUES.forEach(m => Object.keys(CAT[m]).forEach(mo => {
+    const h = normTexte(m + " " + mo);
+    if(toks.every(t => h.indexOf(t) >= 0)) r.push({ marque:m, modele:mo });
+  }));
+  return r.slice(0, 60);
+}
+const LIB_ENERGIE = e => (ENERGIES.filter(x => x[0] === e)[0] || ["","—"])[1];
+
+/* ============================================================
+   ÉTAT DE L'INTERFACE
+   ============================================================ */
+const TABS = [
+  { id:"accueil", l:"Accueil",  i:"jauge" },
+  { id:"plan",    l:"Plan",     i:"cal" },
+  { id:"carnet",  l:"Carnet",   i:"livre" },
+  { id:"garage",  l:"Garage",   i:"voiture" },
+  { id:"reglages",l:"Réglages", i:"cog" }
+];
+const state = { tab:"accueil", fiche:null, modal:null, journal:false, neuf:false, quota:null,
+                limite:40 };
+
+function render(){
+  const v = $("#view");
+  const anc = document.querySelector(".sheet");
+  const posSheet = anc ? anc.scrollTop : 0;
+  const posPage = window.scrollY;
+  const h = v.offsetHeight;
+  if(h) v.style.minHeight = h + "px";
+  try{ dessiner(); }
+  finally{ requestAnimationFrame(() => { v.style.minHeight = ""; }); }
+  const neuf = document.querySelector(".sheet");
+  if(neuf && posSheet) neuf.scrollTop = posSheet;
+  if(window.scrollY !== posPage) window.scrollTo(0, posPage);
+}
+
+function dessiner(){
+  $("#tabs").innerHTML = TABS.map(t =>
+    '<button class="tab ' + (state.tab === t.id ? "on" : "") + '" data-act="tab" data-id="' + t.id + '">' +
+    svg(t.i, 20) + '<span>' + t.l + '</span></button>').join("");
+
+  const chip = $("#ver-chip");
+  if(chip){ chip.textContent = "v" + VERSION; chip.classList.toggle("neuf", state.neuf); }
+
+  const slot = document.getElementById("veh-slot");
+  if(slot){
+    const v = vActif(), n = vehicules().length, mq = masque();
+    slot.innerHTML =
+      '<button class="iconbtn' + (mq ? " on" : "") + '" data-act="basculer-masque" ' +
+        'title="' + (mq ? "Réafficher les montants" : "Masquer les montants") + '" ' +
+        'aria-label="' + (mq ? "Montants masqués, toucher pour les réafficher" : "Masquer les montants") + '">' +
+        svg(mq ? "oeilBarre" : "oeil", 17) + '</button>' +
+      (v ? '<button class="esp" data-act="' + (n > 1 ? "vehicule-suivant" : "tab") + '" data-id="garage" ' +
+            'title="' + (n > 1 ? "Passer au véhicule suivant" : "Ouvrir le garage") + '">' +
+            svg("voiture", 16) + '<span>' + esc(nomVehicule(v)) + '</span></button>' : "");
+  }
+
+  const ae = document.activeElement;
+  const fid = ae && ae.id ? ae.id : null;
+  let sel = null;
+  try{ if(ae && ae.selectionStart != null) sel = [ae.selectionStart, ae.selectionEnd]; }catch(e){}
+
+  const vw = $("#view");
+  if(state.tab === "accueil")     vw.innerHTML = vueAccueil();
+  else if(state.tab === "plan")   vw.innerHTML = vuePlan();
+  else if(state.tab === "carnet") vw.innerHTML = vueCarnet();
+  else if(state.tab === "garage") vw.innerHTML = vueGarage();
+  else                            vw.innerHTML = vueReglages();
+
+  if(fid){
+    const el = document.getElementById(fid);
+    if(el && el !== document.activeElement){
+      el.focus({ preventScroll:true });
+      if(sel && el.setSelectionRange){ try{ el.setSelectionRange(sel[0], sel[1]); }catch(e){} }
+    }
+  }
+
+  if(state.fiche && !DB.vehicules[state.fiche]) state.fiche = null;
+  $("#sheet").innerHTML = state.fiche ? vueFiche(DB.vehicules[state.fiche]) : "";
+  $("#modal").innerHTML = state.modal ? vueModal(state.modal) : "";
+
+  const couvert = !!($("#sheet").firstChild || $("#modal").firstChild);
+  document.body.style.overflow = couvert ? "hidden" : "";
+  if(state.modal && state.modal.focus){
+    const el = document.getElementById(state.modal.focus);
+    if(el && document.activeElement !== el){ el.focus(); if(el.select) el.select(); }
+  }
+}
+
+/* ============================================================
+   ACCUEIL
+   Le kilométrage est l'élément le plus grand de l'écran : c'est la seule
+   donnée qu'on saisit régulièrement, et celle dont tout le reste découle.
+   ============================================================ */
+function ligneEcheance(e, v, avecCout){
+  const et = e.etat;
+  const det = e.par === "km"
+    ? (e.resteKm <= 0 ? "dépassé de " + km(-e.resteKm) : "dans " + km(e.resteKm))
+    : (e.dueDate && e.dueDate < todayISO() ? "échu " + delai(e.dueDate) : delai(e.date));
+  const sec = e.par === "km"
+    ? (e.date ? " · " + delai(e.date) : "")
+    : (e.dueKm != null ? " · " + km(Math.max(0, e.resteKm)) : "");
+  return '<button class="op" data-act="ope-ouvrir" data-id="' + e.o.k + '">' +
+    '<span class="op-ic ' + (ICET[et] || "") + '">' + svg(e.o.i, 15) + '</span>' +
+    '<span class="op-mid"><span class="op-lib">' + esc(e.o.n) +
+      (et === "depasse" ? '<span class="badge dang">à faire</span>' : "") + '</span>' +
+    '<span class="op-met ' + (CLET[et] || "") + '">' + esc(det) + esc(sec) + '</span>' +
+    '<span class="op-note" style="font-style:normal;color:var(--gris2)">tous les ' + esc(libelleInter(e.o, v)) + '</span></span>' +
+    (avecCout ? '<span class="op-mt"><b>' + fmtE(e.o.c*100) + '</b></span>' : "") + '</button>';
+}
+
+function blocCT(v){
+  const c = ctEtat(v);
+  if(!c){
+    return '<button class="op" data-act="ct-modifier">' +
+      '<span class="op-ic">' + svg("doc", 15) + '</span>' +
+      '<span class="op-mid"><span class="op-lib">Contrôle technique</span>' +
+      '<span class="op-met">date de mise en circulation manquante</span></span>' +
+      '<span class="op-mt">Régler</span></button>';
+  }
+  const det = c.contre ? "contre-visite à repasser avant le " + frDate(c.date)
+    : (c.premier ? "premier contrôle" : "prochain contrôle") + " le " + frDate(c.date);
+  return '<button class="op" data-act="ct-modifier">' +
+    '<span class="op-ic ' + (ICET[c.etat] || "") + '">' + svg("doc", 15) + '</span>' +
+    '<span class="op-mid"><span class="op-lib">Contrôle technique' +
+      (c.etat === "depasse" ? '<span class="badge dang">échu</span>' : "") + '</span>' +
+    '<span class="op-met ' + (CLET[c.etat] || "") + '">' + esc(delai(c.date)) + '</span>' +
+    '<span class="op-note" style="font-style:normal;color:var(--gris2)">' + esc(det) + '</span></span>' +
+    '<span class="op-mt">' + svg("chevron", 15) + '</span></button>';
+}
+
+function blocCote(v){
+  const c = cote(v);
+  if(!c){
+    return '<div class="cote"><div class="cote-h">Cote estimée</div>' +
+      '<div class="cote-v" style="font-size:19px;font-weight:500;color:var(--gris)">Prix du neuf inconnu</div>' +
+      '<div class="cote-f" style="font-family:inherit;letter-spacing:0">Saisis le prix catalogue à l\'époque, ou directement une cote relevée ailleurs.</div>' +
+      '<div class="btns" style="margin:12px 0 0"><button class="btn mini" data-act="cote-modifier">Renseigner</button></div></div>';
+  }
+  const pc = v.prixNeuf ? Math.round(c.val / v.prixNeuf * 100) : 0;
+  return '<div class="cote"><div class="cote-h">Cote estimée' +
+    (c.manuelle ? " — saisie à la main" : "") + '</div>' +
+    '<div class="cote-v">' + fmtE(c.val) + '</div>' +
+    '<div class="cote-f">' + (masque() ? MASQUE : fmtE(c.bas,true) + " à " + fmtE(c.haut,true)) + '</div>' +
+    '<div class="cote-d">' +
+      (v.prixNeuf ? '<div>Neuf<b>' + fmtE(v.prixNeuf) + '</b></div>' +
+                    '<div>Décote<b>' + (masque() ? MASQUE : "−" + fmtE(c.decote,true) + " · " + (100-pc) + " %") + '</b></div>' : "") +
+      '<div>Âge<b>' + c.age.toFixed(1).replace(".",",") + " ans" + '</b></div>' +
+    '</div>' +
+    '<div class="btns" style="margin:12px 0 0"><button class="btn mini" data-act="cote-modifier">Corriger</button>' +
+    '<button class="btn mini" data-act="cote-web">Comparer en ligne</button></div>' +
+    (c.manuelle ? "" : '<div class="aide">Estimation à partir du prix du neuf, de l\'âge, du kilométrage et de l\'énergie. Ce n\'est pas une cote officielle.</div>') +
+    '</div>';
+}
+
+function vueAccueil(){
+  const v = vActif();
+  if(!v) return vueAucun();
+
+  const kmj = kmAujourdhui(v);
+  const ech = echeances(v);
+  const ct = ctEtat(v);
+  const urgent = ech.filter(e => e.etat !== "ok");
+  const suite = ech.filter(e => e.etat === "ok").slice(0, 6);
+  const proch = ech[0];
+  const c = cote(v);
+
+  let h = '<section class="total">' +
+    '<div class="total-lbl">' + esc(nomVehicule(v)) +
+      (v.version ? ' <span style="color:var(--gris2)">' + esc(v.version) + '</span>' : "") + '</div>' +
+    '<span class="total-val num" data-act="relever-km">' + nb(kmj) + '<span class="u">km</span></span>' +
+    '<div class="total-sub">' +
+      '<span>' + (v.kmDate === todayISO() ? "relevé aujourd\'hui"
+        : v.kmDate ? "relevé le " + esc(frDate(v.kmDate)) + (kmj > (v.km||0) ? " · projeté depuis" : "")
+        : "jamais relevé") + '</span>' +
+      '<span><b>' + nb(kmAn(v)) + '</b> km par an</span>' +
+      (c ? '<span>cote <b>' + fmtE(c.val) + '</b></span>' : "") +
+    '</div>';
+
+  // La jauge dit où l'on en est de la prochaine échéance : même rôle que la
+  // jauge de budget ailleurs, mais entre deux entretiens.
+  if(proch && proch.dueKm != null && proch.ik){
+    const parcouru = clamp(kmj - proch.b.km, 0, proch.ik);
+    const pc = Math.round(parcouru / proch.ik * 100);
+    const e = proch.etat;
+    h += '<div class="bud"><div class="bud-l">' +
+      '<span class="' + (CLET[e] || "") + '">' + esc(proch.o.n) + '</span>' +
+      '<span class="r ' + (CLET[e] || "") + '">' +
+        (proch.resteKm > 0 ? "dans " + nb(proch.resteKm) + " km" : "dépassé") + '</span>' +
+      '</div><div class="bud-b"><i class="' + (e === "ok" ? "ok" : e === "proche" ? "att" : "dang") +
+      '" style="width:' + Math.min(100,pc) + '%"></i></div></div>';
+  } else if(proch){
+    h += '<div class="bud-nul">Prochaine échéance : ' + esc(proch.o.n) + ' ' + esc(delai(proch.date)) + '</div>';
+  }
+  h += '</section>';
+
+  if(sansRepere(v)){
+    h += '<div class="info"><b>Le plan part de la mise en circulation, compteur à zéro.</b> ' +
+      'Tant que la dernière révision n\'est pas déclarée, tout paraît en retard. ' +
+      'Renseigne-la dans la fiche du véhicule, ou note une première intervention dans le carnet.' +
+      '<div class="btns" style="margin:10px 0 0"><button class="btn mini" data-act="fiche-ouvrir" data-id="' + v.id +
+      '">Ouvrir la fiche</button></div></div>';
+  }
+
+  h += '<div class="sect"><h2>Contrôle technique</h2></div>' + blocCT(v);
+
+  h += '<div class="sect"><h2>À faire</h2><span class="cnt">' + urgent.length + '</span><span class="sp"></span>' +
+    (urgent.length ? '<button class="btn mini" data-act="acte-nouveau">Noter une intervention</button>' : "") + '</div>';
+  h += urgent.length
+    ? urgent.map(e => ligneEcheance(e, v, true)).join("")
+    : '<div class="vide"><b>Rien d\'échu</b>Le prochain rendez-vous est ' + esc(proch ? delai(proch.date) : "à définir") + '.</div>';
+
+  h += '<div class="sect"><h2>Ensuite</h2><span class="sp"></span>' +
+    '<button class="btn mini" data-act="tab" data-id="plan">Tout le plan</button></div>';
+  h += suite.length ? suite.map(e => ligneEcheance(e, v, true)).join("")
+                    : '<div class="vide">Aucune autre opération suivie.</div>';
+
+  h += '<div class="sect"><h2>Valeur</h2></div>' + blocCote(v);
+  return h;
+}
+
+function vueAucun(){
+  return '<section class="total" style="border-bottom:0">' +
+    '<div class="total-lbl">Aucun véhicule</div>' +
+    '<span class="total-val" style="font-size:clamp(28px,9vw,38px)">Cherche ton modèle</span>' +
+    '</section>' +
+    '<div class="info">Le catalogue embarque <b>' + NB_MODELES + ' modèles</b> vendus en France et leurs ' +
+    'motorisations. En choisir une remplit l\'énergie, le type de distribution, son intervalle et le prix du ' +
+    'neuf — les quatre données qui pilotent le plan et la cote.</div>' +
+    '<div class="btns grow"><button class="btn pri wide" data-act="vehicule-nouveau">Ajouter un véhicule</button></div>';
+}
+
+/* ============================================================
+   PLAN
+   Les révisions année par année : ce qui tombe, quand, à quel compteur, et ce
+   que l'année coûtera si rien ne change.
+   ============================================================ */
+const HORIZONS = [[5,"5 ans"],[10,"10 ans"],[15,"15 ans"]];
+
+function vuePlan(){
+  const v = vActif();
+  if(!v) return vueAucun();
+  const ans = DB.settings.horizon || 10;
+  const p = plan(v, ans);
+  const total = Object.values(p.par).reduce((s,l) => s + l.reduce((x,o) => x + o.ope.c, 0), 0);
+  const annees = Object.keys(p.par).map(Number).sort((a,b) => a-b);
+
+  let h = '<section class="total" style="padding:22px 0 16px">' +
+    '<div class="total-lbl">Plan d\'entretien — ' + esc(nomVehicule(v)) + '</div>' +
+    '<span class="total-val num" style="font-size:clamp(30px,10vw,42px)">' + fmtE(total*100) +
+      '<span class="u">sur ' + ans + ' ans</span></span>' +
+    '<div class="total-sub"><span><b>' + nb(kmAn(v)) + '</b> km par an</span>' +
+    '<span>compteur projeté <b>' + nb(kmAuJour(v, (p.anCour+ans) + "-12-31")) + ' km</b></span></div>' +
+    '<div class="chips" style="margin-top:14px">' +
+      HORIZONS.map(([n,l]) => '<button class="chip ' + (ans === n ? "on" : "") +
+        '" data-act="horizon" data-id="' + n + '">' + l + '</button>').join("") +
+      '<button class="chip" data-act="tab" data-id="garage">Régler les intervalles</button>' +
+    '</div></section>';
+
+  h += '<div class="info">Coûts indicatifs, main-d\'œuvre comprise, en atelier. ' +
+    'Les intervalles sont génériques : le carnet du constructeur prime, et chaque ligne se corrige en la touchant. ' +
+    'Régime d\'entretien actuel : <b>' + esc((REGIMES.filter(r => r[0] === (v.regime||"normal"))[0]||REGIMES[0])[1]) + '</b>.</div>';
+
+  annees.forEach(a => {
+    const l = p.par[a];
+    const cout = l.reduce((s,o) => s + o.ope.c, 0);
+    const kmFin = kmAuJour(v, a + "-12-31");
+    h += '<div class="an"><div class="an-h"><span class="an-v">' + a + '</span>' +
+      '<span class="an-k">' + nb(kmFin) + ' km</span>' +
+      '<span class="an-c">' + (cout ? fmtE(cout*100) : "—") + '</span></div>';
+    if(!l.length){
+      h += '<div class="an-vide">Rien de prévu.</div></div>';
+      return;
+    }
+    h += l.map(x => {
+      const passe = x.passe;
+      const ic = passe ? "dang" : (x.ct ? "acc" : "");
+      return '<button class="op" data-act="' + (x.ct ? "ct-modifier" : "ope-ouvrir") + '" data-id="' + x.ope.k + '">' +
+        '<span class="op-ic ' + ic + '">' + svg(x.ope.i, 15) + '</span>' +
+        '<span class="op-mid"><span class="op-lib">' + esc(x.ope.n) +
+          (passe ? '<span class="badge dang">en retard</span>' : "") + '</span>' +
+        '<span class="op-met">' + esc(frMoisAn(x.date)) + ' · ' + nb(x.km) + ' km' +
+          (x.par === "km" ? "" : " · à la durée") + '</span></span>' +
+        '<span class="op-mt"><b>' + fmtE(x.ope.c*100) + '</b></span></button>';
+    }).join("") + '</div>';
+  });
+
+  h += '<div class="aide" style="margin:18px 0 0">Chaque occurrence repart de la précédente : ' +
+    'une opération faite en retard décale toutes les suivantes.</div>';
+  return h;
+}
+
+/* ============================================================
+   CARNET
+   Ce qui a réellement été fait, avec ce que ça a coûté.
+   ============================================================ */
+function vueCarnet(){
+  const v = vActif();
+  if(!v) return vueAucun();
+  const l = actesDe(v.id).sort((a,b) => a.date < b.date ? 1 : a.date > b.date ? -1 : 0);
+  const tot = l.reduce((s,a) => s + (a.cout||0), 0);
+  const kmj = kmAujourdhui(v);
+  const parKm = kmj > 0 ? tot / kmj : 0;
+  const an1 = l.length ? anneeDe(l[l.length-1].date) : 0;
+  const ansCouv = an1 ? Math.max(1, ageAns(l[l.length-1].date)) : 0;
+
+  let h = '<section class="total" style="padding:22px 0 16px">' +
+    '<div class="total-lbl">Dépensé en entretien — ' + esc(nomVehicule(v)) + '</div>' +
+    '<span class="total-val num" style="font-size:clamp(32px,11vw,46px)">' + fmtE(tot) + '</span>' +
+    '<div class="total-sub">' +
+      '<span><b>' + l.length + '</b> ' + (l.length > 1 ? "interventions" : "intervention") + '</span>' +
+      (parKm ? '<span><b>' + (masque() ? MASQUE : (parKm/100).toFixed(3).replace(".",",") + " €") + '</b> par km</span>' : "") +
+      (ansCouv ? '<span><b>' + fmtE(tot/ansCouv) + '</b> par an</span>' : "") +
+    '</div></section>';
+
+  h += '<div class="btns grow"><button class="btn pri" data-act="acte-nouveau">Noter une intervention</button></div>';
+
+  if(!l.length){
+    h += '<div class="vide"><b>Le carnet est vide</b>Chaque intervention notée ici recale le plan : ' +
+      'l\'opération repart de sa date et de son compteur.</div>';
+    return h;
+  }
+
+  let anCour = null;
+  l.slice(0, state.limite).forEach(a => {
+    const an = anneeDe(a.date);
+    if(an !== anCour){
+      anCour = an;
+      const cA = l.filter(x => anneeDe(x.date) === an).reduce((s,x) => s + (x.cout||0), 0);
+      h += '<div class="jour"><span>' + an + '</span><span class="sp"></span><span>' + fmtE(cA) + '</span></div>';
+    }
+    const o = OPE(a.ope);
+    h += '<button class="op" data-act="acte-modifier" data-id="' + a.id + '">' +
+      '<span class="op-ic ok">' + svg(o ? o.i : "cle", 15) + '</span>' +
+      '<span class="op-mid"><span class="op-lib">' + esc(a.titre || (o ? o.n : "Intervention")) + '</span>' +
+      '<span class="op-met">' + esc(frDate(a.date)) + ' · ' + nb(a.km) + ' km</span>' +
+      (a.note ? '<span class="op-note">' + esc(a.note) + '</span>' : "") + '</span>' +
+      '<span class="op-mt"><b>' + fmt(a.cout) + '</b></span></button>';
+  });
+  if(l.length > state.limite)
+    h += '<button class="op" data-act="plus" style="justify-content:center;color:var(--acc)">' +
+      'Voir les ' + (l.length - state.limite) + ' plus anciennes</button>';
+  return h;
+}
+
+/* ============================================================
+   GARAGE
+   ============================================================ */
+function vueGarage(){
+  const l = vehicules();
+  let h = '<section class="total" style="padding:22px 0 16px">' +
+    '<div class="total-lbl">Garage</div>' +
+    '<span class="total-val num" style="font-size:clamp(32px,11vw,46px)">' + l.length +
+      '<span class="u">' + (l.length > 1 ? "véhicules" : "véhicule") + '</span></span></section>';
+
+  h += '<div class="btns grow"><button class="btn pri" data-act="vehicule-nouveau">Ajouter un véhicule</button></div>';
+
+  if(!l.length) return h + '<div class="vide"><b>Aucun véhicule</b>Tout commence par une marque et un modèle.</div>';
+
+  const actif = vActif();
+  h += l.map(v => {
+    const c = ctEtat(v), co = cote(v);
+    const ech = echeances(v);
+    const urg = ech.filter(e => e.etat !== "ok").length;
+    const pr = ech[0];
+    return '<button class="prow" data-act="fiche-ouvrir" data-id="' + v.id + '">' +
+      '<span class="pemo' + (actif && actif.id === v.id ? " on" : "") + '">' + svg("voiture", 19) + '</span>' +
+      '<span class="pmid"><span class="pname">' + esc(nomVehicule(v)) + '</span>' +
+      (v.version ? '<span class="psub">' + esc(v.version) + '</span>' : "") +
+      '<span class="psub">' + nb(kmAujourdhui(v)) + ' km · ' + esc(LIB_ENERGIE(v.energie)) +
+        (v.mec ? " · " + anneeDe(v.mec) : "") + '</span>' +
+      '<span class="psub ' + (urg ? "c-dang" : "") + '">' +
+        (urg ? urg + (urg > 1 ? " opérations en retard" : " opération en retard")
+             : pr ? "prochaine : " + esc(pr.o.n) + " " + esc(delai(pr.date)) : "rien de suivi") +
+        (c ? ' · CT ' + esc(delai(c.date)) : "") + '</span></span>' +
+      '<span class="pmt"><span class="m">' + (co ? fmtE(co.val) : "—") + '</span>' +
+      '<span class="r">' + (actif && actif.id === v.id ? "actif" : "") + '</span></span></button>';
+  }).join("");
+  return h;
+}
+
+/* ============================================================
+   FICHE DU VÉHICULE
+   Un panneau plein écran, un seul enregistrement : les champs ne se
+   redessinent pas sous les doigts pendant la saisie.
+   ============================================================ */
+function opt(l, val){
+  return l.map(([k,n]) => '<option value="' + k + '"' + (k === val ? " selected" : "") + '>' + esc(n) + '</option>').join("");
+}
+function vueFiche(v){
+  if(!v) return "";
+  const c = ctEtat(v);
+  let h = '<div class="sheet"><div class="sheet-top">' +
+    '<button class="iconbtn" data-act="fiche-fermer" aria-label="Fermer">' + svg("croix", 18) + '</button>' +
+    '<span class="t">' + esc(nomVehicule(v)) + '</span><span class="sp"></span>' +
+    '<button class="btn pri mini" data-act="fiche-ok" data-id="' + v.id + '">Enregistrer</button>' +
+    '</div><div class="sheet-in">';
+
+  h += '<section class="total" style="padding:20px 0 14px">' +
+    '<div class="total-lbl">' + esc(nomVehicule(v)) + '</div>' +
+    '<span class="total-val" style="font-size:clamp(20px,6vw,26px)">' +
+      esc(v.version || "Motorisation à préciser") + '</span>' +
+    '<div class="total-sub"><span>' +
+      (v.mec ? "mis en circulation le " + esc(frDate(v.mec)) : "mise en circulation inconnue") + '</span>' +
+    '<span>' + esc(LIB_ENERGIE(v.energie)) + '</span></div>' +
+    '</section>';
+
+  h += '<div class="bloc"><div class="bloc-h">Identité</div><div class="bloc-b">' +
+    '<div class="btns" style="margin:0 0 12px"><button class="btn wide" data-act="cat-ouvrir" data-id="' + v.id +
+      '">' + svg("loupe",15) + ' Reprendre dans le catalogue</button></div>' +
+    '<div class="duo"><div class="champ"><label for="f-marque">Marque</label>' +
+      '<input type="text" id="f-marque" value="' + esc(v.marque||"") + '"></div>' +
+    '<div class="champ"><label for="f-modele">Modèle</label>' +
+      '<input type="text" id="f-modele" value="' + esc(v.modele||"") + '"></div></div>' +
+    '<div class="champ"><label for="f-version">Motorisation</label>' +
+      '<input type="text" id="f-version" value="' + esc(v.version||"") + '" placeholder="1.5 BlueHDi 130"></div>' +
+    '<div class="duo"><div class="champ"><label for="f-genre">Catégorie</label>' +
+      '<select id="f-genre">' + opt(GENRES, v.genre||"vp") + '</select></div>' +
+    '<div class="champ"><label for="f-mec">1re mise en circulation</label>' +
+      '<input type="date" id="f-mec" value="' + esc(v.mec||"") + '"></div></div>' +
+    '</div></div>';
+
+  h += '<div class="bloc"><div class="bloc-h">Motorisation</div><div class="bloc-b">' +
+    '<div class="duo"><div class="champ"><label for="f-energie">Énergie</label>' +
+      '<select id="f-energie">' + opt(ENERGIES, v.energie||"essence") + '</select></div>' +
+    '<div class="champ"><label for="f-boite">Boîte</label>' +
+      '<select id="f-boite">' + opt(BOITES, v.boite||"manuelle") + '</select></div></div>' +
+    '<div class="champ"><label for="f-distrib">Distribution</label>' +
+      '<select id="f-distrib">' + opt(DISTRIBS, v.distrib||"inconnu") + '</select>' +
+      '<div class="aide">Une chaîne retire la ligne « distribution » du plan. Dans le doute, garde la courroie : ' +
+      'c\'est l\'hypothèse la plus prudente.</div></div>' +
+    '<div class="champ"><label for="f-regime">Régime d\'entretien</label>' +
+      '<select id="f-regime">' + opt(REGIMES, v.regime||"normal") + '</select>' +
+      '<div class="aide">Sévère resserre d\'un tiers les vidanges, filtres et bougies : trajets courts, ville, ' +
+      'poussière, remorquage. Long life les espace, comme certains contrats constructeur.</div></div>' +
+    '</div></div>';
+
+  h += '<div class="bloc"><div class="bloc-h">Kilométrage</div><div class="bloc-b">' +
+    '<div class="duo"><div class="champ"><label for="f-km">Compteur</label>' +
+      '<input type="number" id="f-km" inputmode="numeric" value="' + (v.km||0) + '"></div>' +
+    '<div class="champ"><label for="f-kmdate">Relevé le</label>' +
+      '<input type="date" id="f-kmdate" value="' + esc(v.kmDate||todayISO()) + '"></div></div>' +
+    '<div class="champ"><label for="f-kman">Kilomètres par an</label>' +
+      '<input type="number" id="f-kman" inputmode="numeric" value="' + (v.kmAn||"") + '" placeholder="' + nb(kmAn(v)) + ' — déduit">' +
+      '<div class="aide">Laisse vide pour le laisser se déduire du compteur et de l\'âge. C\'est ce rythme qui date ' +
+      'les échéances kilométriques.</div></div>' +
+    '</div></div>';
+
+  h += '<div class="bloc"><div class="bloc-h">Point de départ du plan</div><div class="bloc-b">' +
+    '<div class="duo"><div class="champ"><label for="f-revdate">Dernière révision</label>' +
+      '<input type="date" id="f-revdate" value="' + esc(v.revDate||"") + '"></div>' +
+    '<div class="champ"><label for="f-revkm">Au compteur</label>' +
+      '<input type="number" id="f-revkm" inputmode="numeric" value="' + (v.revKm||"") + '"></div></div>' +
+    '<div class="aide">Sert de repère aux opérations dont aucune intervention n\'est encore notée. ' +
+    'Sans elle, tout repart de la mise en circulation, compteur à zéro, et le plan paraît en retard.</div>' +
+    '</div></div>';
+
+  h += '<div class="bloc"><div class="bloc-h">Contrôle technique</div><div class="bloc-b">' +
+    '<div class="duo"><div class="champ"><label for="f-ct">Dernier contrôle</label>' +
+      '<input type="date" id="f-ct" value="' + esc(v.ctDernier||"") + '"></div>' +
+    '<div class="champ"><label for="f-ctres">Résultat</label>' +
+      '<select id="f-ctres">' + opt([["ok","Favorable"],["contre","Contre-visite"]], v.ctResultat||"ok") + '</select></div></div>' +
+    (c ? '<div class="lig"><div class="l">Prochain<div class="d">' +
+        (c.contre ? "contre-visite sous deux mois"
+          : c.premier ? "premier contrôle, fenêtre ouverte dès le " + esc(frDate(c.ouverture))
+          : "deux ans après la dernière visite") +
+      '</div></div><span class="v ' + (CLET[c.etat]||"") + '">' + esc(frDate(c.date)) + '</span></div>' : "") +
+    '<div class="aide">Ne le passe pas trop en avance : la prochaine échéance se compte depuis la date de la visite, ' +
+    'pas depuis celle qui était prévue. Pour vendre, il doit dater de moins de six mois.</div>' +
+    '</div></div>';
+
+  h += '<div class="bloc"><div class="bloc-h">Valeur</div><div class="bloc-b">' +
+    '<div class="duo"><div class="champ"><label for="f-neuf">Prix du neuf</label>' +
+      '<input type="text" id="f-neuf" inputmode="decimal" value="' + (v.prixNeuf ? brut(v.prixNeuf) : "") + '" placeholder="28 900"></div>' +
+    '<div class="champ"><label for="f-cote">Cote relevée</label>' +
+      '<input type="text" id="f-cote" inputmode="decimal" value="' + (v.coteMan ? brut(v.coteMan) : "") + '" placeholder="estimée"></div></div>' +
+    '<div class="aide">Le prix catalogue de l\'époque, options comprises, suffit à lancer l\'estimation. ' +
+    'Une cote relevée ailleurs remplace l\'estimation dès qu\'elle est saisie.</div>' +
+    '</div></div>';
+
+  h += '<div class="bloc"><div class="bloc-h">Intervalles</div><div class="bloc-b">' +
+    '<div class="aide" style="margin:0 0 10px">Les valeurs génériques du plan, à aligner sur le carnet du constructeur. ' +
+    'Touche une ligne pour la corriger ou la retirer.</div>';
+  GROUPES.forEach(g => {
+    const l = OPES.filter(o => o.g === g && (!o.en || o.en.indexOf(v.energie) >= 0));
+    if(!l.length) return;
+    h += '<div class="jour"><span>' + esc(g) + '</span></div>';
+    h += l.map(o => {
+      const act = applicable(o, v);
+      const ov = (v.plan||{})[o.k];
+      return '<button class="lig" style="width:100%;text-align:left" data-act="ope-regler" data-id="' + o.k + '">' +
+        '<span class="l" style="opacity:' + (act ? 1 : .45) + '">' + esc(o.n) +
+        '<span class="d">' + (act ? esc(libelleInter(o, v)) + (ov && (ov.km != null && ov.km !== "" || ov.mois != null && ov.mois !== "") ? " · corrigé" : "")
+                                  : "retiré du plan") + '</span></span>' +
+        '<span class="v">' + svg("chevron", 15) + '</span></button>';
+    }).join("");
+  });
+  h += '</div></div>';
+
+  h += '<div class="btns grow"><button class="btn" data-act="vehicule-actif" data-id="' + v.id + '">Rendre actif</button>' +
+    '<button class="btn dang" data-act="vehicule-supprimer" data-id="' + v.id + '">Supprimer</button></div>';
+  h += '<div class="btns"><button class="btn pri wide" data-act="fiche-ok" data-id="' + v.id + '">Enregistrer</button></div>';
+
+  return h + '</div></div>';
+}
+
+/* ============================================================
+   RÉGLAGES
+   ============================================================ */
+function vueReglages(){
+  const th = themeActuel(), acc = accentActuel();
+  const nbV = vehicules().length, nbA = Object.keys(DB.actes).length;
+
+  let h = '<section class="total" style="padding:22px 0 14px">' +
+    '<div class="total-lbl">Réglages</div>' +
+    '<span class="total-val num" style="font-size:clamp(28px,8vw,34px)">Carnet</span>' +
+    '<div class="total-sub"><span class="mono">v' + VERSION + '</span><span>schéma ' + SCHEMA + '</span></div></section>';
+
+  h += '<div class="bloc"><div class="bloc-h">Catalogue</div><div class="bloc-b">' +
+    '<div class="lig"><div class="l">Modèles embarqués<div class="d">' +
+      MARQUES.length + ' marques du marché français, avec leurs motorisations, le type de ' +
+      'distribution et le prix du neuf indicatif.</div></div>' +
+      '<span class="v">' + NB_MODELES + '</span></div>' +
+    '<div class="lig"><div class="l">Motorisations<div class="d">Chacune renseigne l\'énergie, la ' +
+      'distribution et son intervalle.</div></div>' +
+      '<span class="v">' + MARQUES.reduce((t,m) => t + Object.values(CAT[m]).reduce((u,x) => u + x[2].length, 0), 0) + '</span></div>' +
+    '<div class="aide">Valeurs indicatives, établies pour le marché français : elles servent à préremplir, ' +
+    'pas à faire autorité. Le carnet du constructeur prime, et tout se corrige dans la fiche du véhicule. ' +
+    'Aucun appel réseau : le catalogue est dans le fichier.</div>' +
+    '</div></div>';
+
+  h += '<div class="bloc"><div class="bloc-h">Hypothèses</div><div class="bloc-b">' +
+    '<div class="lig"><div class="l">Kilométrage annuel par défaut<div class="d">' +
+      'Sert quand un véhicule n\'a ni rythme saisi ni assez d\'historique. Sert aussi de référence à la cote.</div></div>' +
+      '<button class="btn mini" data-act="kman-defaut">' + nb(DB.settings.kmAn||13000) + ' km</button></div>' +
+    '</div></div>';
+
+  h += '<div class="bloc"><div class="bloc-h">Apparence</div><div class="bloc-b">' +
+    '<div class="lig"><div class="l">Thème</div><div class="seg">' +
+      THEMES.map(([k,l]) => '<button class="' + (th === k ? "on" : "") + '" data-act="theme" data-id="' + k + '">' + l + '</button>').join("") +
+    '</div></div>' +
+    '<div class="lig" style="align-items:flex-start"><div class="l">Couleur d\'accent' +
+      '<div class="d">Une seule couleur porte l\'interface.</div></div></div>' +
+    '<div class="pastilles" style="margin-top:2px">' +
+      ACCENTS.map(([hex,nom]) => '<button class="past ' + (acc === hex ? "on" : "") + '" ' +
+        'style="background:' + hex + '" data-act="accent" data-id="' + hex + '" title="' + nom + '" aria-label="' + nom + '"></button>').join("") +
+    '</div>' +
+    '<div class="apercu">' + icoSVG(36) +
+      '<div class="d" style="font-size:12px;color:var(--gris)">L\'icône prend la couleur choisie. Un raccourci déjà posé sur l\'écran d\'accueil garde son ancienne image : retire-le et rajoute-le pour la rafraîchir.</div>' +
+    '</div></div></div>';
+
+  const q = state.quota;
+  h += '<div class="bloc"><div class="bloc-h">Données</div><div class="bloc-b">' +
+    '<div class="lig"><div class="l">Sauvegarde<div class="d">Tout le garage, ou un seul véhicule.</div></div>' +
+      '<button class="btn" data-act="exporter">Exporter</button></div>' +
+    '<div class="lig"><div class="l">Restaurer<div class="d">Ajoute ce qui manque, n\'écrase rien.</div></div>' +
+      '<button class="btn" data-act="importer">Importer</button></div>' +
+    '<div class="lig"><div class="l">Contenu<div class="d">' +
+      nbV + (nbV > 1 ? " véhicules · " : " véhicule · ") + nbA + (nbA > 1 ? " interventions" : " intervention") +
+      '</div></div><span class="mono" style="font-size:12px;color:var(--gris)">' +
+      (DB.meta.exporte ? "export " + esc(quand(DB.meta.exporte)) : "jamais exporté") + '</span></div>' +
+    (q && q.usage != null ? '<div class="lig" style="display:block"><div class="l">Espace utilisé<div class="d">' +
+      ko(q.usage) + ' sur ' + ko(q.quota) + '</div></div><div class="barre"><i style="width:' +
+      Math.min(100, Math.round((q.usage/(q.quota||1))*100)) + '%"></i></div></div>' : "") +
+    '<div class="lig"><div class="l">Tout effacer<div class="d">Définitif, sans retour.</div></div>' +
+      '<button class="btn dang" data-act="effacer">Effacer</button></div>' +
+    '</div></div>';
+
+  h += '<div class="bloc"><div class="bloc-h">Nouveautés' +
+    '<div style="margin-left:auto"><button class="btn mini" data-act="basculer-journal">' +
+    (state.journal ? "Réduire" : "Voir") + '</button></div></div>';
+  if(state.journal){
+    h += '<div class="bloc-b">' + JOURNAL.map(j =>
+      '<div class="jrn"><div class="jrn-h"><span class="jrn-v">v' + j.v + '</span>' +
+      '<span class="jrn-d">' + esc(frDate(j.d, true)) + '</span><span class="jrn-t">' + esc(j.t) + '</span></div>' +
+      '<ul>' + j.l.map(x => '<li>' + esc(x) + '</li>').join("") + '</ul></div>').join("") + '</div>';
+  }
+  h += '</div>';
+
+  h += '<div class="aide" style="text-align:center;margin:18px 0 0">' +
+    'Tout reste sur cet appareil. Aucun appel réseau, aucun compte, rien qui parte sur un serveur.</div>';
+  return h;
+}
+
+/* ============================================================
+   MODALES
+   ============================================================ */
+function ligneModele(marque, modele){
+  const l = motosDe(marque, modele);
+  const en = [];
+  l.forEach(x => { if(en.indexOf(x.energie) < 0) en.push(x.energie); });
+  return '<button class="reslt" data-act="cat-modele" data-id="' + esc(marque + "||" + modele) + '">' +
+    '<span class="n">' + esc(marque + " " + modele) +
+    '<span class="d">' + esc(libAnnees(marque, modele)) + ' · ' +
+      esc(en.map(LIB_ENERGIE).join(", ").toLowerCase()) + '</span></span>' +
+    '<span class="p">' + l.length + (l.length > 1 ? " motorisations" : " motorisation") + '</span></button>';
+}
+
+function vueModal(m){
+  const v = vActif();
+  let h = '<div class="mdl-bg" data-act="fermer-modal"><div class="mdl" data-stop="1">';
+
+  if(m.type === "vehicule"){
+    const cible = m.cible ? DB.vehicules[m.cible] : null;
+    const titre = cible ? "Reprendre dans le catalogue" : "Nouveau véhicule";
+
+    /* --- on cherche son modèle --- */
+    if(!m.etape || m.etape === "modele"){
+      const res = m.q ? chercherModele(m.q) : [];
+      h += '<h3>' + titre + '</h3>' +
+        '<div class="sous">' + NB_MODELES + ' modèles du marché français, ' +
+        MARQUES.length + ' marques.</div>' +
+        '<div class="champ"><input type="text" id="m-q" value="' + esc(m.q||"") + '" ' +
+          'placeholder="Marque ou modèle — « 308 », « clio », « golf »" ' +
+          'autocomplete="off" autocorrect="off" spellcheck="false"></div>';
+
+      if(m.q){
+        h += res.length
+          ? res.map(r => ligneModele(r.marque, r.modele)).join("")
+          : '<div class="vide" style="padding:24px 4px"><b>Rien trouvé</b>' +
+            'Le catalogue ne couvre pas tout. Saisis le véhicule à la main, rien ne sera perdu.</div>';
+      } else if(m.marque){
+        h += '<button class="etape" data-act="cat-marque" data-id="">' + svg("croix",13) +
+          ' <b>' + esc(m.marque) + '</b> — changer de marque</button>' +
+          modelesDe(m.marque).map(mo => ligneModele(m.marque, mo)).join("");
+      } else {
+        h += '<div class="jour"><span>Marques</span></div><div class="chips" style="flex-wrap:wrap;overflow:visible">' +
+          MARQUES.map(x => '<button class="chip" data-act="cat-marque" data-id="' + esc(x) + '">' +
+            esc(x) + '</button>').join("") + '</div>';
+      }
+      h += '<div class="btns grow"><button class="btn" data-act="fermer-modal">Annuler</button>' +
+        '<button class="btn" data-act="cat-manuel">Saisir à la main</button></div>';
+    }
+
+    /* --- puis sa motorisation : c'est elle qui porte l'énergie, la
+           distribution et le prix du neuf --- */
+    else if(m.etape === "moteur"){
+      const l = motosDe(m.marque, m.modele);
+      h += '<h3>' + esc(m.marque + " " + m.modele) + '</h3>' +
+        '<div class="sous">' + esc(libAnnees(m.marque, m.modele)) + ' — choisis la motorisation.</div>' +
+        l.map((x,k) => '<button class="reslt" data-act="cat-moto" data-id="' + k + '">' +
+          '<span class="n">' + esc(x.n) +
+          '<span class="d">' + esc(LIB_ENERGIE(x.energie)) + ' · ' +
+            (x.distrib === "chaine" ? "chaîne" : x.distrib === "courroie"
+              ? "courroie " + nb(x.dk) + " km" : "distribution inconnue") + '</span></span>' +
+          '<span class="p">' + (x.prix ? fmtE(x.prix, true) + " neuf" : "") + '</span></button>').join("") +
+        '<button class="reslt" data-act="cat-moto" data-id="-1">' +
+          '<span class="n">Je ne sais pas<span class="d">à préciser plus tard dans la fiche</span></span>' +
+          '<span class="p">' + svg("chevron",14) + '</span></button>' +
+        '<div class="btns grow"><button class="btn" data-act="cat-retour">Retour</button></div>';
+    }
+
+    /* --- il ne reste que ce que le catalogue ne peut pas savoir --- */
+    else if(m.etape === "infos"){
+      const a = anneesDe(m.marque, m.modele);
+      h += '<h3>' + esc(m.marque + " " + m.modele) + '</h3>' +
+        '<div class="sous">' + esc(m.moto ? m.moto.n : "motorisation non précisée") + '</div>' +
+        (m.moto ? '<div class="info">Énergie <b>' + esc(LIB_ENERGIE(m.moto.energie)) + '</b>' +
+          (m.moto.distrib === "chaine" ? ' · distribution par <b>chaîne</b>, pas de remplacement au programme'
+            : m.moto.distrib === "courroie" ? ' · courroie de distribution à <b>' + nb(m.moto.dk) + ' km</b> ou ' +
+              libMois(m.moto.dm) : '') +
+          (m.moto.prix ? ' · neuf autour de <b>' + fmtE(m.moto.prix, true) + '</b>' : "") + '</div>' : "") +
+        '<div class="duo"><div class="champ"><label for="m-mec">1re mise en circulation</label>' +
+          '<input type="date" id="m-mec" value="' + esc(m.mec||"") + '"></div>' +
+        '<div class="champ"><label for="m-boite">Boîte</label>' +
+          '<select id="m-boite">' + opt(BOITES, m.boite||"manuelle") + '</select></div></div>' +
+        (a ? '<div class="aide" style="margin-top:-4px">Modèle commercialisé de ' + a[0] + ' à ' + a[1] + '.</div>' : "") +
+        '<div class="champ"><label for="m-km">Compteur aujourd\'hui</label>' +
+          '<div class="mt-in"><input type="number" id="m-km" inputmode="numeric" value="' +
+          (m.km||"") + '" placeholder="78400"><span class="mt-eur">km</span></div></div>' +
+        '<div class="btns grow"><button class="btn" data-act="cat-retour">Retour</button>' +
+        '<button class="btn pri" data-act="vehicule-ok">Ajouter</button></div>' +
+        '<div class="aide">Le reste — dernière révision, contrôle technique, régime d\'entretien — se règle ' +
+        'dans la fiche et affine le plan.</div>';
+    }
+
+    /* --- hors catalogue : tout à la main, rien n'est bloqué --- */
+    else {
+      h += '<h3>Saisie manuelle</h3>' +
+        '<div class="sous">Pour ce que le catalogue ne couvre pas.</div>' +
+        '<div class="duo"><div class="champ"><label for="m-marque">Marque</label>' +
+          '<input type="text" id="m-marque" value="' + esc(m.marque||"") + '"></div>' +
+        '<div class="champ"><label for="m-modele">Modèle</label>' +
+          '<input type="text" id="m-modele" value="' + esc(m.modele||"") + '"></div></div>' +
+        '<div class="champ"><label for="m-version">Motorisation</label>' +
+          '<input type="text" id="m-version" value="' + esc(m.version||"") + '" placeholder="1.5 dCi 110"></div>' +
+        '<div class="duo"><div class="champ"><label for="m-energie">Énergie</label>' +
+          '<select id="m-energie">' + opt(ENERGIES, m.energie||"essence") + '</select></div>' +
+        '<div class="champ"><label for="m-boite">Boîte</label>' +
+          '<select id="m-boite">' + opt(BOITES, m.boite||"manuelle") + '</select></div></div>' +
+        '<div class="duo"><div class="champ"><label for="m-mec">1re mise en circulation</label>' +
+          '<input type="date" id="m-mec" value="' + esc(m.mec||"") + '"></div>' +
+        '<div class="champ"><label for="m-km">Compteur</label>' +
+          '<input type="number" id="m-km" inputmode="numeric" value="' + (m.km||"") + '"></div></div>' +
+        '<div class="btns grow"><button class="btn" data-act="cat-retour">Catalogue</button>' +
+        '<button class="btn pri" data-act="vehicule-ok">Ajouter</button></div>';
+    }
+  }
+
+  else if(m.type === "km"){
+    h += '<h3>Relever le kilométrage</h3>' +
+      '<div class="sous">' + esc(nomVehicule(v)) + ' — dernier relevé ' +
+        (v.kmDate ? esc(nb(v.km)) + " km le " + esc(frDate(v.kmDate)) : "jamais") + '</div>' +
+      '<div class="champ"><div class="mt-in"><input type="number" id="m-km" inputmode="numeric" ' +
+        'value="' + (m.km != null ? m.km : kmAujourdhui(v)) + '"><span class="mt-eur">km</span></div>' +
+        '<div class="raccourcis">' + [500,1000,2000,5000].map(n =>
+          '<button data-act="km-plus" data-id="' + n + '">+' + nb(n) + '</button>').join("") + '</div></div>' +
+      '<div class="champ"><label for="m-date">Relevé le</label>' +
+        '<input type="date" id="m-date" value="' + esc(m.date || todayISO()) + '"></div>' +
+      '<div class="btns grow"><button class="btn" data-act="fermer-modal">Annuler</button>' +
+      '<button class="btn pri" data-act="km-ok">Enregistrer</button></div>';
+  }
+
+  else if(m.type === "acte"){
+    const o = OPE(m.ope);
+    h += '<h3>' + (m.id ? "Modifier l\'intervention" : "Noter une intervention") + '</h3>' +
+      '<div class="sous">' + (o ? esc(o.n) : "Choisis l\'opération réglée") + '</div>' +
+      '<div class="champ"><label for="m-ope">Opération</label><select id="m-ope">' +
+        '<option value="">Autre — à décrire</option>' +
+        GROUPES.map(g => '<optgroup label="' + esc(g) + '">' +
+          OPES.filter(x => x.g === g).map(x =>
+            '<option value="' + x.k + '"' + (x.k === m.ope ? " selected" : "") + '>' + esc(x.n) + '</option>').join("") +
+          '</optgroup>').join("") +
+        '<optgroup label="Contrôle"><option value="ct"' + (m.ope === "ct" ? " selected" : "") + '>Contrôle technique</option></optgroup>' +
+        '</select></div>' +
+      '<div class="champ"><label for="m-titre">Intitulé</label>' +
+        '<input type="text" id="m-titre" value="' + esc(m.titre||"") + '" placeholder="' + esc(o ? o.n : "Ce qui a été fait") + '"></div>' +
+      '<div class="duo"><div class="champ"><label for="m-date">Date</label>' +
+        '<input type="date" id="m-date" value="' + esc(m.date || todayISO()) + '"></div>' +
+      '<div class="champ"><label for="m-km">Compteur</label>' +
+        '<input type="number" id="m-km" inputmode="numeric" value="' + (m.km != null ? m.km : kmAujourdhui(v)) + '"></div></div>' +
+      '<div class="champ"><label for="m-cout">Coût</label>' +
+        '<div class="mt-in"><input type="text" id="m-cout" inputmode="decimal" value="' + esc(m.cout||"") +
+        '" placeholder="' + (o ? brut(o.c*100) : "0,00") + '"><span class="mt-eur">€</span></div></div>' +
+      '<div class="champ"><label for="m-note">Note</label>' +
+        '<textarea id="m-note" placeholder="garage, pièces, remarques">' + esc(m.note||"") + '</textarea></div>' +
+      '<div class="btns grow"><button class="btn" data-act="fermer-modal">Annuler</button>' +
+      '<button class="btn pri" data-act="acte-ok">Enregistrer</button></div>' +
+      (m.id ? '<div class="btns"><button class="btn dang wide" data-act="acte-supprimer" data-id="' + m.id + '">Supprimer</button></div>' : "") +
+      '<div class="aide">L\'opération notée devient le nouveau point de départ : les échéances suivantes repartent ' +
+      'de cette date et de ce compteur.</div>';
+  }
+
+  else if(m.type === "ope"){
+    const o = OPE(m.k);
+    const e = echeance(v, o);
+    const dep = e.b;
+    h += '<h3>' + esc(o.n) + '</h3>' +
+      '<div class="sous">' + esc(o.g) + ' · tous les ' + esc(libelleInter(o, v)) + '</div>' +
+      (o.d ? '<div class="info">' + esc(o.d) + '</div>' : "") +
+      '<div class="lig"><div class="l">Dernière fois<div class="d">' +
+        (dep.source === "acte" ? "intervention notée" : dep.source === "revision" ? "dernière révision déclarée"
+          : "jamais notée — départ à la mise en circulation") + '</div></div>' +
+        '<span class="v">' + esc(frDate(dep.date)) + ' · ' + nb(dep.km) + ' km</span></div>' +
+      '<div class="lig"><div class="l">Prochaine<div class="d">' +
+        (e.par === "km" ? "déclenchée par le compteur" : "déclenchée par la durée") + '</div></div>' +
+        '<span class="v ' + (CLET[e.etat]||"") + '">' +
+        (e.dueKm != null ? nb(e.dueKm) + " km" : "") + (e.dueKm != null && e.dueDate ? " · " : "") +
+        (e.dueDate ? frDate(e.dueDate) : "") + '</span></div>' +
+      '<div class="duo" style="margin-top:14px"><div class="champ"><label for="m-ik">Tous les (km)</label>' +
+        '<input type="number" id="m-ik" inputmode="numeric" value="' + (e.ik||"") + '" placeholder="aucun"></div>' +
+      '<div class="champ"><label for="m-im">Ou tous les (mois)</label>' +
+        '<input type="number" id="m-im" inputmode="numeric" value="' + (e.im||"") + '" placeholder="aucun"></div></div>' +
+      '<div class="aide">Les valeurs du carnet constructeur, si tu les as, remplacent avantageusement les génériques.</div>' +
+      '<div class="btns grow" style="margin-top:14px">' +
+        '<button class="btn" data-act="ope-defaut" data-id="' + o.k + '">Valeurs d\'origine</button>' +
+        '<button class="btn pri" data-act="ope-ok" data-id="' + o.k + '">Enregistrer</button></div>' +
+      '<div class="btns grow"><button class="btn" data-act="acte-depuis-ope" data-id="' + o.k + '">Je viens de le faire</button>' +
+        '<button class="btn dang" data-act="ope-retirer" data-id="' + o.k + '">Retirer du plan</button></div>';
+  }
+
+  else if(m.type === "ct"){
+    const c = ctEtat(v);
+    h += '<h3>Contrôle technique</h3>' +
+      '<div class="sous">' + esc(nomVehicule(v)) + ' — ' +
+        esc((GENRES.filter(g => g[0] === (v.genre||"vp"))[0]||GENRES[0])[1].toLowerCase()) + '</div>' +
+      '<div class="duo"><div class="champ"><label for="m-ct">Dernier contrôle</label>' +
+        '<input type="date" id="m-ct" value="' + esc(m.ct != null ? m.ct : (v.ctDernier||"")) + '"></div>' +
+      '<div class="champ"><label for="m-ctres">Résultat</label>' +
+        '<select id="m-ctres">' + opt([["ok","Favorable"],["contre","Contre-visite"]], m.res || v.ctResultat || "ok") + '</select></div></div>' +
+      (c ? '<div class="lig"><div class="l">Prochain<div class="d">' + esc(delai(c.date)) + '</div></div>' +
+        '<span class="v ' + (CLET[c.etat]||"") + '">' + esc(frDate(c.date)) + '</span></div>' : "") +
+      '<div class="info">Voiture : quatre ans après la première mise en circulation, puis tous les deux ans. ' +
+      'Utilitaire : même rythme, avec une visite antipollution chaque année entre deux. Moto et scooter : ' +
+      'cinq ans, puis tous les trois ans. Collection de plus de trente ans : tous les cinq ans. ' +
+      'Contre-visite : deux mois pour repasser.</div>' +
+      '<div class="btns grow"><button class="btn" data-act="fermer-modal">Annuler</button>' +
+      '<button class="btn pri" data-act="ct-ok">Enregistrer</button></div>';
+  }
+
+  else if(m.type === "cote"){
+    h += '<h3>Valeur du véhicule</h3>' +
+      '<div class="sous">Le prix du neuf lance l\'estimation. Une cote relevée ailleurs la remplace.</div>' +
+      '<div class="champ"><label for="m-neuf">Prix du neuf</label>' +
+        '<div class="mt-in"><input type="text" id="m-neuf" inputmode="decimal" value="' +
+        (v.prixNeuf ? brut(v.prixNeuf) : "") + '" placeholder="28 900"><span class="mt-eur">€</span></div></div>' +
+      '<div class="champ"><label for="m-cote">Cote relevée</label>' +
+        '<div class="mt-in"><input type="text" id="m-cote" inputmode="decimal" value="' +
+        (v.coteMan ? brut(v.coteMan) : "") + '" placeholder="laisse vide pour estimer"><span class="mt-eur">€</span></div></div>' +
+      '<div class="btns grow"><button class="btn" data-act="fermer-modal">Annuler</button>' +
+      '<button class="btn pri" data-act="cote-ok">Enregistrer</button></div>' +
+      '<div class="aide">L\'estimation applique une décote moyenne à l\'âge, corrigée de l\'écart entre ton compteur ' +
+      'et le kilométrage attendu, et de l\'énergie. Elle ne connaît ni ton marché local, ni l\'état réel du véhicule.</div>';
+  }
+
+  else if(m.type === "kman"){
+    h += '<h3>Kilométrage annuel par défaut</h3>' +
+      '<div class="sous">Utilisé quand rien d\'autre ne permet de le déduire.</div>' +
+      '<div class="champ"><div class="mt-in"><input type="number" id="m-kman" inputmode="numeric" value="' +
+      (DB.settings.kmAn||13000) + '"><span class="mt-eur">km</span></div>' +
+      '<div class="raccourcis">' + [8000,13000,20000,30000].map(n =>
+        '<button data-act="kman-set" data-id="' + n + '">' + nb(n) + '</button>').join("") + '</div></div>' +
+      '<div class="btns grow"><button class="btn" data-act="fermer-modal">Annuler</button>' +
+      '<button class="btn pri" data-act="kman-ok">Enregistrer</button></div>';
+  }
+
+  else if(m.type === "supprimer-vehicule"){
+    const vv = DB.vehicules[m.id];
+    const n = vv ? actesDe(vv.id).length : 0;
+    h += '<h3>Supprimer le véhicule ?</h3>' +
+      '<div class="sous">' + esc(nomVehicule(vv)) + (vv && vv.version ? " — " + esc(vv.version) : "") + '</div>' +
+      '<div class="avert">' + (n ? n + (n > 1 ? " interventions partiront avec lui." : " intervention partira avec lui.")
+                                 : "Aucune intervention notée.") + ' Annulable le temps du bandeau.</div>' +
+      '<div class="btns grow"><button class="btn" data-act="fermer-modal">Annuler</button>' +
+      '<button class="btn dang" data-act="vehicule-supprimer-ok" data-id="' + m.id + '">Supprimer</button></div>';
+  }
+
+  else if(m.type === "export"){
+    h += '<h3>Exporter</h3><div class="sous">Un fichier JSON, lisible et restaurable.</div>' +
+      '<button class="lig" style="width:100%;text-align:left" data-act="exporter-ok" data-id="tout">' +
+        '<span class="l">Tout le garage<span class="d">' + vehicules().length + ' véhicules · ' +
+        Object.keys(DB.actes).length + ' interventions</span></span>' +
+        '<span class="v">' + svg("chevron",15) + '</span></button>' +
+      vehicules().map(vv => '<button class="lig" style="width:100%;text-align:left" data-act="exporter-ok" data-id="' + vv.id + '">' +
+        '<span class="l">' + esc(nomVehicule(vv)) + '<span class="d">' + esc(vv.version || "—") + ' · ' +
+        actesDe(vv.id).length + ' interventions</span></span>' +
+        '<span class="v">' + svg("chevron",15) + '</span></button>').join("") +
+      '<div class="btns"><button class="btn wide" data-act="fermer-modal">Annuler</button></div>';
+  }
+
+  else if(m.type === "effacer"){
+    h += '<h3>Tout effacer ?</h3>' +
+      '<div class="sous">Véhicules, interventions et réglages. Définitif.</div>' +
+      '<div class="avert"><b>Exporte d\'abord</b> si tu veux pouvoir revenir en arrière.</div>' +
+      '<div class="champ"><label for="m-conf">Tape EFFACER pour confirmer</label>' +
+        '<input type="text" id="m-conf" autocapitalize="characters" spellcheck="false"></div>' +
+      '<div class="btns grow"><button class="btn" data-act="fermer-modal">Annuler</button>' +
+      '<button class="btn dang" data-act="effacer-ok">Effacer</button></div>';
+  }
+
+  else if(m.type === "journal"){
+    h += '<h3>Nouveautés</h3><div class="sous">v' + VERSION + '</div>' +
+      JOURNAL.slice(0,1).map(j => '<div class="jrn"><div class="jrn-h"><span class="jrn-v">v' + j.v + '</span>' +
+        '<span class="jrn-d">' + esc(frDate(j.d, true)) + '</span><span class="jrn-t">' + esc(j.t) + '</span></div>' +
+        '<ul>' + j.l.map(x => '<li>' + esc(x) + '</li>').join("") + '</ul></div>').join("") +
+      '<div class="btns"><button class="btn pri wide" data-act="journal-vu">Compris</button></div>';
+  }
+
+  return h + '</div></div>';
+}
+
+/* ============================================================
+   ACTIONS
+   ============================================================ */
+function ouvrirModal(m){ state.modal = m; render(); }
+function fermerModal(){ state.modal = null; render(); }
+const val = id => { const e = document.getElementById(id); return e ? e.value : ""; };
+const entier = id => { const v = parseInt(String(val(id)).replace(/[^\d-]/g,""), 10); return isNaN(v) ? 0 : v; };
+
+/* Basculer un champ redessine la modale : sans relever la saisie en cours,
+   une recherche à moitié tapée disparaîtrait. */
+function capturerModal(){
+  const m = state.modal;
+  if(!m) return;
+  if(m.type === "vehicule"){
+    if(document.getElementById("m-q")) m.q = val("m-q");
+    if(document.getElementById("m-mec")) m.mec = val("m-mec");
+    if(document.getElementById("m-boite")) m.boite = val("m-boite");
+    if(document.getElementById("m-km")) m.km = entier("m-km");
+    if(m.etape === "manuel"){
+      m.marque = val("m-marque"); m.modele = val("m-modele");
+      m.version = val("m-version"); m.energie = val("m-energie");
+    }
+  }
+  if(m.type === "km"){ m.km = entier("m-km"); m.date = val("m-date"); }
+  if(m.type === "acte"){
+    m.ope = val("m-ope"); m.titre = val("m-titre"); m.date = val("m-date");
+    m.km = entier("m-km"); m.cout = val("m-cout"); m.note = val("m-note");
+  }
+  if(m.type === "ct"){ m.ct = val("m-ct"); m.res = val("m-ctres"); }
+}
+
+/* Une motorisation choisie au catalogue renseigne quatre choses d'un coup :
+   l'énergie et la distribution, qui décident des opérations du plan, son
+   intervalle, qui décide de leur date, et le prix du neuf, qui lance la cote.
+   Un prix déjà saisi n'est jamais écrasé. */
+function appliquerModele(v, marque, modele, mo){
+  v.marque = marque || v.marque;
+  v.modele = modele || v.modele;
+  if(!mo) return;
+  v.version = mo.n;
+  v.energie = mo.energie;
+  v.distrib = mo.distrib;
+  if(mo.prix && !v.prixNeuf) v.prixNeuf = mo.prix;
+  v.plan = v.plan || {};
+  if(mo.dk || mo.dm) v.plan.distribution = { km:mo.dk || "", mois:mo.dm || "", off:false };
+  else delete v.plan.distribution;
+}
+function creerVehicule(o){
+  const v = { id:uid(), marque:"", modele:"", version:"", genre:"vp", energie:"essence",
+    boite:o.boite || "manuelle", distrib:"inconnu", regime:"normal", mec:o.mec || "",
+    km:Math.max(0, o.km || 0), kmDate:todayISO(), kmAn:0, revDate:"", revKm:0,
+    ctDernier:"", ctResultat:"ok", prixNeuf:0, coteMan:0, plan:{}, note:"", cree:Date.now() };
+  appliquerModele(v, o.marque, o.modele, o.moto);
+  if(o.energie) v.energie = o.energie;
+  if(o.version) v.version = o.version;
+  DB.vehicules[v.id] = v;
+  DB.settings.actif = v.id;
+  sauverVehicule(v); sauver(true);
+  return v;
+}
+
+document.addEventListener("click", async ev => {
+  const t = ev.target.closest("[data-act]");
+  if(!t){
+    // Toucher le fond d'une modale la ferme ; toucher la modale elle-même non.
+    if(ev.target.closest("[data-stop]")) return;
+    return;
+  }
+  const act = t.dataset.act, id = t.dataset.id;
+  if(act === "fermer-modal" && ev.target.closest("[data-stop]") && ev.target !== t) return;
+
+  /* ---- navigation ---- */
+  if(act === "tab"){ state.tab = id; state.limite = 40; render(); window.scrollTo(0,0); return; }
+  if(act === "basculer-masque"){ DB.settings.masque = !DB.settings.masque; sauver(true); render(); return; }
+  if(act === "vehicule-suivant"){
+    const l = vehicules();
+    if(l.length < 2) return;
+    const i = l.findIndex(x => x.id === DB.settings.actif);
+    DB.settings.actif = l[(i+1) % l.length].id;
+    sauver(true); render();
+    toast(nomVehicule(vActif()) + (vActif().version ? " — " + vActif().version : ""));
+    return;
+  }
+  if(act === "plus"){ state.limite += 40; render(); return; }
+  if(act === "horizon"){ DB.settings.horizon = parseInt(id,10) || 10; sauver(true); render(); return; }
+  if(act === "basculer-journal"){ state.journal = !state.journal; render(); return; }
+  if(act === "journal-ouvrir"){ ouvrirModal({ type:"journal" }); return; }
+  if(act === "journal-vu"){ DB.meta.vue = VERSION; state.neuf = false; sauver(true); fermerModal(); return; }
+  if(act === "fermer-modal"){ fermerModal(); return; }
+  if(act === "fiche-fermer"){ state.fiche = null; render(); return; }
+  if(act === "fiche-ouvrir"){ state.fiche = id; render(); return; }
+
+  /* ---- véhicules ---- */
+  if(act === "vehicule-nouveau"){ ouvrirModal({ type:"vehicule", etape:"modele", q:"", focus:"m-q" }); return; }
+  if(act === "cat-ouvrir"){ ouvrirModal({ type:"vehicule", cible:id, etape:"modele", q:"", focus:"m-q" }); return; }
+  if(act === "cat-marque"){ capturerModal(); state.modal.marque = id; state.modal.q = ""; render(); return; }
+  if(act === "cat-modele"){
+    capturerModal();
+    const [ma, mo] = id.split("||");
+    state.modal.marque = ma; state.modal.modele = mo; state.modal.etape = "moteur";
+    render(); return;
+  }
+  if(act === "cat-moto"){
+    const m = state.modal;
+    const l = motosDe(m.marque, m.modele);
+    const k = parseInt(id, 10);
+    m.moto = k >= 0 ? l[k] : null;
+    if(m.cible){
+      const v = DB.vehicules[m.cible];
+      if(v){ appliquerModele(v, m.marque, m.modele, m.moto); sauverVehicule(v); }
+      fermerModal();
+      toast(v ? nomVehicule(v) + " mis à jour" : "Véhicule introuvable");
+      return;
+    }
+    m.etape = "infos";
+    if(!m.mec){
+      // La date n'est pas connue, mais l'année de lancement du modèle est une
+      // borne basse honnête : elle évite une saisie partie de rien.
+      const a = anneesDe(m.marque, m.modele);
+      if(a) m.mec = Math.max(a[0], Math.min(a[1], new Date().getFullYear() - 5)) + "-01-01";
+    }
+    render(); return;
+  }
+  if(act === "cat-manuel"){ capturerModal(); state.modal.etape = "manuel"; render(); return; }
+  if(act === "cat-retour"){
+    capturerModal();
+    const m = state.modal;
+    m.etape = m.etape === "infos" ? "moteur" : "modele";
+    if(m.etape === "modele" && !m.q) m.marque = m.marque || "";
+    render(); return;
+  }
+  if(act === "vehicule-ok"){
+    capturerModal();
+    const m = state.modal;
+    if(m.etape === "manuel" && !(m.marque || "").trim() && !(m.modele || "").trim()){
+      toast("Il faut au moins une marque ou un modèle"); return;
+    }
+    const v = creerVehicule({
+      marque:(m.marque||"").trim(), modele:(m.modele||"").trim(),
+      moto:m.etape === "manuel" ? null : m.moto,
+      version:m.etape === "manuel" ? (m.version||"").trim() : "",
+      energie:m.etape === "manuel" ? m.energie : "",
+      boite:m.boite, mec:m.mec, km:m.km });
+    fermerModal();
+    state.tab = "accueil"; render(); window.scrollTo(0,0);
+    toast(nomVehicule(v) + " ajouté");
+    return;
+  }
+  if(act === "vehicule-actif"){ DB.settings.actif = id; sauver(true); state.fiche = null; state.tab = "accueil"; render(); return; }
+  if(act === "vehicule-supprimer"){ ouvrirModal({ type:"supprimer-vehicule", id }); return; }
+  if(act === "vehicule-supprimer-ok"){
+    const v = DB.vehicules[id];
+    if(!v) return;
+    corbeille = { vehicules:[JSON.parse(JSON.stringify(v))],
+                  actes:actesDe(id).map(a => JSON.parse(JSON.stringify(a))) };
+    actesDe(id).forEach(a => supprimerActeDB(a.id));
+    supprimerVehiculeDB(id);
+    if(DB.settings.actif === id) DB.settings.actif = (vehicules()[0] || {}).id || "";
+    sauver(true);
+    state.fiche = null; fermerModal();
+    toast("Véhicule supprimé", "annuler-suppr");
+    return;
+  }
+  if(act === "annuler-suppr"){
+    if(!corbeille) return;
+    (corbeille.vehicules||[]).forEach(v => { DB.vehicules[v.id] = v; sauverVehicule(v); });
+    (corbeille.actes||[]).forEach(a => { DB.actes[a.id] = a; sauverActe(a); });
+    if(!DB.settings.actif) DB.settings.actif = (corbeille.vehicules[0]||{}).id || "";
+    corbeille = null; sauver(true);
+    fermerToast(); render();
+    toast("Rétabli");
+    return;
+  }
+  if(act === "fiche-ok"){
+    const v = DB.vehicules[id];
+    if(!v) return;
+    v.marque = val("f-marque").trim(); v.modele = val("f-modele").trim();
+    v.version = val("f-version").trim(); v.genre = val("f-genre");
+    v.mec = val("f-mec"); v.energie = val("f-energie"); v.boite = val("f-boite");
+    v.distrib = val("f-distrib"); v.regime = val("f-regime");
+    v.km = Math.max(0, entier("f-km")); v.kmDate = val("f-kmdate") || todayISO();
+    v.kmAn = Math.max(0, entier("f-kman"));
+    v.revDate = val("f-revdate"); v.revKm = Math.max(0, entier("f-revkm"));
+    v.ctDernier = val("f-ct"); v.ctResultat = val("f-ctres");
+    v.prixNeuf = cents(val("f-neuf")); v.coteMan = cents(val("f-cote"));
+    sauverVehicule(v);
+    state.fiche = null; render();
+    toast("Fiche enregistrée");
+    return;
+  }
+
+  /* ---- kilométrage ---- */
+  if(act === "relever-km"){
+    const v = vActif();
+    if(!v){ ouvrirModal({ type:"vehicule", etape:"modele", q:"", focus:"m-q" }); return; }
+    ouvrirModal({ type:"km", km:kmAujourdhui(v), date:todayISO() });
+    return;
+  }
+  if(act === "km-plus"){
+    capturerModal();
+    state.modal.km = (state.modal.km || 0) + (parseInt(id,10) || 0);
+    render(); return;
+  }
+  if(act === "km-ok"){
+    const v = vActif();
+    capturerModal();
+    const n = Math.max(0, state.modal.km || 0);
+    if(n < (v.km||0)){
+      // Un compteur ne recule pas : si le chiffre baisse, c'est une correction,
+      // pas un relevé. On l'accepte, mais on le dit.
+      toast("Compteur corrigé à la baisse");
+    }
+    v.km = n; v.kmDate = state.modal.date || todayISO();
+    sauverVehicule(v); fermerModal();
+    return;
+  }
+
+  /* ---- interventions ---- */
+  if(act === "acte-nouveau"){ ouvrirModal({ type:"acte", ope:"", date:todayISO(), km:kmAujourdhui(vActif()) }); return; }
+  if(act === "acte-depuis-ope"){
+    const o = OPE(id);
+    ouvrirModal({ type:"acte", ope:id, titre:o ? o.n : "", date:todayISO(),
+                  km:kmAujourdhui(vActif()), cout:o ? brut(o.c*100) : "" });
+    return;
+  }
+  if(act === "acte-modifier"){
+    const a = DB.actes[id];
+    if(!a) return;
+    ouvrirModal({ type:"acte", id:a.id, ope:a.ope, titre:a.titre, date:a.date,
+                  km:a.km, cout:brut(a.cout), note:a.note });
+    return;
+  }
+  if(act === "acte-ok"){
+    const v = vActif();
+    capturerModal();
+    const m = state.modal;
+    const o = OPE(m.ope);
+    const a = m.id ? DB.actes[m.id] : { id:uid(), vehicule:v.id, cree:Date.now() };
+    if(!a) return;
+    a.ope = m.ope || "";
+    a.titre = (m.titre||"").trim() || (o ? o.n : (m.ope === "ct" ? "Contrôle technique" : "Intervention"));
+    a.date = m.date || todayISO();
+    a.km = Math.max(0, m.km || 0);
+    a.cout = cents(m.cout);
+    a.note = (m.note||"").trim();
+    DB.actes[a.id] = a; sauverActe(a);
+    // Une intervention plus récente que le dernier relevé avance le compteur.
+    if(a.km > (v.km||0) && a.date >= (v.kmDate||"")){ v.km = a.km; v.kmDate = a.date; sauverVehicule(v); }
+    // Un contrôle technique noté met à jour la date du dernier CT.
+    if(a.ope === "ct" && (!v.ctDernier || a.date > v.ctDernier)){ v.ctDernier = a.date; v.ctResultat = "ok"; sauverVehicule(v); }
+    fermerModal();
+    toast(m.id ? "Intervention modifiée" : "Intervention notée");
+    return;
+  }
+  if(act === "acte-supprimer"){
+    const a = DB.actes[id];
+    if(!a) return;
+    corbeille = { vehicules:[], actes:[JSON.parse(JSON.stringify(a))] };
+    supprimerActeDB(id);
+    fermerModal();
+    toast("Intervention supprimée", "annuler-suppr");
+    return;
+  }
+
+  /* ---- opérations et intervalles ---- */
+  if(act === "ope-ouvrir"){ if(OPE(id)) ouvrirModal({ type:"ope", k:id }); return; }
+  if(act === "ope-regler"){ if(OPE(id)) ouvrirModal({ type:"ope", k:id }); return; }
+  if(act === "ope-ok"){
+    const v = vActif();
+    const ik = entier("m-ik"), im = entier("m-im");
+    v.plan = v.plan || {};
+    v.plan[id] = { ...(v.plan[id]||{}), km:ik || "", mois:im || "", off:false };
+    sauverVehicule(v); fermerModal();
+    toast("Intervalle enregistré");
+    return;
+  }
+  if(act === "ope-defaut"){
+    const v = vActif();
+    if(v.plan) delete v.plan[id];
+    sauverVehicule(v); fermerModal();
+    toast("Valeurs d'origine rétablies");
+    return;
+  }
+  if(act === "ope-retirer"){
+    const v = vActif();
+    v.plan = v.plan || {};
+    const etait = !!(v.plan[id] && v.plan[id].off);
+    v.plan[id] = { ...(v.plan[id]||{}), off:!etait };
+    sauverVehicule(v); fermerModal();
+    toast(etait ? "Remis au plan" : "Retiré du plan");
+    return;
+  }
+
+  /* ---- contrôle technique ---- */
+  if(act === "ct-modifier"){ if(vActif()) ouvrirModal({ type:"ct" }); return; }
+  if(act === "ct-ok"){
+    const v = vActif();
+    capturerModal();
+    v.ctDernier = state.modal.ct || "";
+    v.ctResultat = state.modal.res || "ok";
+    sauverVehicule(v); fermerModal();
+    return;
+  }
+
+  /* ---- valeur ---- */
+  if(act === "cote-modifier"){ if(vActif()) ouvrirModal({ type:"cote" }); return; }
+  if(act === "cote-ok"){
+    const v = vActif();
+    v.prixNeuf = cents(val("m-neuf"));
+    v.coteMan = cents(val("m-cote"));
+    sauverVehicule(v); fermerModal();
+    return;
+  }
+  if(act === "cote-web"){
+    const v = vActif();
+    const q = [v.marque, v.modele, v.version, anneeDe(v.mec) || "", nb(kmAujourdhui(v)) + " km", "cote occasion"]
+      .filter(Boolean).join(" ");
+    window.open("https://www.google.com/search?q=" + encodeURIComponent(q), "_blank", "noopener");
+    return;
+  }
+
+  /* ---- hypothèses ---- */
+  if(act === "kman-defaut"){ ouvrirModal({ type:"kman" }); return; }
+  if(act === "kman-set"){ const e = document.getElementById("m-kman"); if(e) e.value = id; return; }
+  if(act === "kman-ok"){
+    DB.settings.kmAn = Math.max(1000, entier("m-kman") || 13000);
+    sauver(true); fermerModal();
+    return;
+  }
+
+  /* ---- apparence ---- */
+  if(act === "theme"){
+    ecritLS(LSTHEME, id); appliquerTheme(id);
+    DB.settings.theme = id; sauver(true); majIcone(); render(); return;
+  }
+  if(act === "accent"){
+    ecritLS(LSACC, id); appliquerAccent(id);
+    DB.settings.accent = id; sauver(true); majIcone(); render(); return;
+  }
+
+  /* ---- données ---- */
+  if(act === "exporter"){ ouvrirModal({ type:"export" }); return; }
+  if(act === "exporter-ok"){ fermerModal(); exporterJSON(id); return; }
+  if(act === "importer"){
+    const inp = document.createElement("input");
+    inp.type = "file"; inp.accept = "application/json,.json";
+    inp.onchange = () => { if(inp.files && inp.files[0]) importerFichier(inp.files[0]); };
+    inp.click();
+    return;
+  }
+  if(act === "effacer"){ ouvrirModal({ type:"effacer", focus:"m-conf" }); return; }
+  if(act === "effacer-ok"){
+    const v = (val("m-conf") || "").trim().toUpperCase();
+    if(v !== "EFFACER"){ toast("Tape EFFACER pour confirmer"); return; }
+    try{ await IDB.vider(); }catch(e){}
+    DB = JSON.parse(JSON.stringify(DEFAULTS));
+    DB.settings.theme = themeActuel(); DB.settings.accent = accentActuel();
+    corbeille = null;
+    state.fiche = null; state.tab = "accueil";
+    fermerModal(); window.scrollTo(0,0);
+    toast("Tout a été effacé");
+    return;
+  }
+});
+
+/* La recherche filtre à la frappe : le rendu conserve le focus et la position
+   du curseur, donc la saisie n'est pas interrompue. */
+document.addEventListener("input", ev => {
+  if(ev.target.id !== "m-q" || !state.modal) return;
+  state.modal.q = ev.target.value;
+  render();
+});
+
+/* Les listes déroulantes d'une modale la redessinent : le choix d'une
+   opération change l'intitulé et le coût proposés. */
+document.addEventListener("change", ev => {
+  const e = ev.target;
+  if(!state.modal) return;
+  if(e.id === "m-ope"){
+    capturerModal();
+    const o = OPE(state.modal.ope);
+    if(o){
+      if(!state.modal.titre || OPES.some(x => x.n === state.modal.titre)) state.modal.titre = o.n;
+      if(!state.modal.cout) state.modal.cout = brut(o.c*100);
+    }
+    render();
+  }
+  if(e.id === "m-ctres" || e.id === "m-ct"){ capturerModal(); render(); }
+});
+
+/* ============================================================
+   EXPORT ET IMPORT
+   ============================================================ */
+function filtrerPortee(obj, portee, cle){
+  const r = {};
+  Object.entries(obj).forEach(([k,v]) => {
+    if(portee === "tout" || (cle ? v[cle] === portee : k === portee)) r[k] = v;
+  });
+  return r;
+}
+function contenuSauvegarde(portee){
+  const p = portee || "tout";
+  return JSON.stringify({ app:"carnet", appVersion:VERSION, schema:SCHEMA, portee:p,
+    vehicules:filtrerPortee(DB.vehicules, p, null),
+    actes:filtrerPortee(DB.actes, p, "vehicule"),
+    settings:DB.settings, meta:DB.meta }, null, 2);
+}
+function telecharger(nom, blob){
+  const u = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = u; a.download = nom;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(u), 4000);
+}
+function exporterJSON(portee){
+  const p = portee || "tout";
+  const d = new Date();
+  const v = DB.vehicules[p];
+  const suffixe = v ? "-" + normTexte(nomVehicule(v)).replace(/ /g,"-") : "";
+  const nom = "carnet" + suffixe + "-" + d.getFullYear() + p2(d.getMonth()+1) + p2(d.getDate()) + ".json";
+  telecharger(nom, new Blob([contenuSauvegarde(p)], { type:"application/json" }));
+  DB.meta.exporte = Date.now(); sauver(true); render();
+  const nv = v ? 1 : vehicules().length;
+  const na = Object.keys(filtrerPortee(DB.actes, p, "vehicule")).length;
+  toast(nv + (nv > 1 ? " véhicules et " : " véhicule et ") + na +
+        (na > 1 ? " interventions exportés" : " intervention exportée"));
+}
+async function importerFichier(f){
+  try{
+    const x = JSON.parse(await f.text());
+    const r = fusionnerSauvegarde(x);
+    render();
+    toast(r.nv + (r.nv > 1 ? " véhicules et " : " véhicule et ") + r.na +
+          (r.na > 1 ? " interventions ajoutés" : " intervention ajoutée"));
+  }catch(e){
+    toast("Fichier illisible : " + ((e && e.message) || e));
+  }
+}
+
+/* ============================================================
+   ICÔNE ET MANIFESTE, PEINTS À LA COULEUR D'ACCENT
+   ============================================================ */
+function dessinerIcone(taille, marge){
+  const c = document.createElement("canvas");
+  c.width = c.height = taille;
+  const x = c.getContext("2d");
+  const acc = accentActuel();
+  // « maskable » : Android rogne l'icône en cercle ou en écusson selon le
+  // téléphone. On peint alors tout le carré et on garde le sigle au centre.
+  const p = marge ? taille * 0.12 : 0;
+  const t = taille - p * 2, r = t * 0.22;
+  x.fillStyle = acc;
+  if(marge) x.fillRect(0, 0, taille, taille);
+  else{
+    x.beginPath();
+    x.moveTo(r, 0); x.arcTo(t, 0, t, t, r); x.arcTo(t, t, 0, t, r);
+    x.arcTo(0, t, 0, 0, r); x.arcTo(0, 0, t, 0, r); x.closePath();
+    x.fill();
+  }
+  const u = t / 64, o = p;
+  x.strokeStyle = surAccent(acc);
+  x.lineCap = "round"; x.lineWidth = 5 * u;
+  x.beginPath();
+  x.arc(o + 32*u, o + 44*u, 16*u, Math.PI, 2*Math.PI);
+  x.stroke();
+  x.beginPath();
+  x.moveTo(o + 32*u, o + 44*u); x.lineTo(o + 42.5*u, o + 29.5*u);
+  x.stroke();
+  return c.toDataURL("image/png");
+}
+let _manifeste = null;
+function majIcone(){
+  try{
+    const acc = accentActuel(), sur = surAccent(acc);
+    const fav = document.getElementById("favicon");
+    if(fav) fav.href = "data:image/svg+xml," + encodeURIComponent(
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">' +
+      '<rect width="64" height="64" rx="14" fill="' + acc + '"/>' +
+      '<path d="M16 44a16 16 0 1 1 32 0M32 44 42.5 29.5" fill="none" stroke="' + sur + '" ' +
+      'stroke-width="5" stroke-linecap="round"/></svg>');
+
+    const p192 = dessinerIcone(192, false), p512 = dessinerIcone(512, false), pm = dessinerIcone(512, true);
+    let at = document.querySelector('link[rel="apple-touch-icon"]');
+    if(!at){ at = document.createElement("link"); at.rel = "apple-touch-icon"; document.head.appendChild(at); }
+    at.href = p192;
+
+    const man = {
+      id:"carnet", name:"Carnet", short_name:"Carnet", start_url:".", scope:".",
+      display:"standalone", orientation:"portrait",
+      background_color: themeActuel() === "sombre" ? "#0d0d10" : "#ffffff",
+      theme_color: themeActuel() === "sombre" ? "#0d0d10" : "#ffffff",
+      icons:[ { src:p192, sizes:"192x192", type:"image/png" },
+              { src:p512, sizes:"512x512", type:"image/png" },
+              { src:pm,  sizes:"512x512", type:"image/png", purpose:"maskable" } ]
+    };
+    if(_manifeste) URL.revokeObjectURL(_manifeste);
+    _manifeste = URL.createObjectURL(new Blob([JSON.stringify(man)], { type:"application/manifest+json" }));
+    let lm = document.querySelector('link[rel="manifest"]');
+    if(!lm){ lm = document.createElement("link"); lm.rel = "manifest"; document.head.appendChild(lm); }
+    lm.href = _manifeste;
+  }catch(e){ /* une icône ratée ne doit pas empêcher l'application de tourner */ }
+}
+
+/* ---------- espace disque ---------- */
+async function majQuota(){
+  if(!navigator.storage || !navigator.storage.estimate) return;
+  try{
+    state.quota = await navigator.storage.estimate();
+    if(pret && state.tab === "reglages") render();
+  }catch(e){}
+}
+
+/* ============================================================
+   DÉMARRAGE
+   ============================================================ */
+async function demarrer(){
+  try{
+    await IDB.ouvrir();
+    DB = assembler(await IDB.tout());
+  }catch(e){
+    document.getElementById("view").innerHTML =
+      '<div class="vide" style="margin-top:60px"><b>Stockage indisponible</b>' +
+      esc(String((e && e.message) || e)) + '<br>La navigation privée de certains navigateurs interdit IndexedDB.</div>';
+    return;
+  }
+  pret = true;
+
+  if(!litLS(LSTHEME) && DB.settings.theme){ ecritLS(LSTHEME, DB.settings.theme); appliquerTheme(DB.settings.theme); }
+  if(!litLS(LSACC) && DB.settings.accent){ ecritLS(LSACC, DB.settings.accent); appliquerAccent(DB.settings.accent); }
+  DB.settings.theme = themeActuel();
+  DB.settings.accent = accentActuel();
+  if(!DB.vehicules[DB.settings.actif]) DB.settings.actif = (vehicules()[0] || {}).id || "";
+
+  state.neuf = DB.meta.vue !== VERSION;
+  render();
+  majIcone();
+  majQuota();
+}
+
+/* Un téléphone rouvert le lendemain doit redater les échéances sans qu'on ait
+   besoin de recharger la page. */
+let _jour = todayISO();
+document.addEventListener("visibilitychange", () => {
+  if(document.visibilityState !== "visible" || !pret) return;
+  if(_jour !== todayISO()){ _jour = todayISO(); render(); }
+});
+window.addEventListener("pagehide", () => { ecouler(); });
+
+demarrer();
+</script>
+</body>
+</html>
