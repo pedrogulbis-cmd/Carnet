@@ -347,7 +347,7 @@ const VERSION = "1.0.0";
 const SCHEMA  = 1;
 const JOURNAL = [
   { v:"1.0.0", d:"2026-09-13", t:"Première version", l:[
-    "Un véhicule se choisit dans un catalogue embarqué de près de mille modèles du marché français, des années quatre-vingt à aujourd'hui, découpés génération par génération. La motorisation retenue renseigne d'un coup l'énergie, le type de distribution, son intervalle et le prix du neuf, que la finition ajuste ensuite. Ce qui n'y figure pas se saisit à la main.",
+    "Un véhicule se choisit dans un catalogue embarqué de plus de mille modèles du marché français, des années quatre-vingt à aujourd'hui, découpés génération par génération et par carrosserie. La recherche accepte les mots de l'acheteur plutôt que ceux du constructeur — « break » trouve un Touring Sports, un SW, un Avant ou un Combi — et retrouve aussi un modèle par sa motorisation : « 122h », « BlueHDi 130 ». La motorisation retenue renseigne d'un coup l'énergie, le type de distribution, son intervalle et le prix d'appel, que la finition majore ensuite. Ce prix reste une estimation et s'affiche à la création, prêt à être corrigé : c'est de lui que part la cote. Ce qui n'y figure pas se saisit à la main.",
     "Le kilométrage occupe le haut de l'écran : c'est lui qui déclenche tout le reste. On le relève d'une touche, et l'application en déduit le rythme annuel.",
     "Le plan d'entretien déroule les opérations année par année, chacune à l'échéance la plus proche entre le kilométrage et la durée — vidange, filtres, distribution, freins, pneus, fluides, et ce qui est propre au diesel, à l'hybride et à l'électrique.",
     "Chaque intervalle se règle : le carnet du constructeur prime toujours sur les valeurs génériques, et trois régimes — normal, sévère, long life — décalent les opérations moteur d'un bloc.",
@@ -1064,8 +1064,10 @@ const CAT = {
  "A3 8V":[2012,2020,["1.4 TFSI 125|E|C|180|84|28.5","2.0 TDI 150|D|C|180|96|32.5","1.6 TDI 110|D|C|180|96|29.5"]],
  "A3 8Y":[2020,2024,["30 TFSI 110|E|C|180|84|31.5","35 TFSI 150|E|C|180|84|35.5","35 TDI 150|D|C|180|96|37.5"]],
  "A3 8Y restylé":[2024,0,["30 TFSI 116|E|C|180|84|34.5","35 TDI 150|D|C|180|96|39.5"]],
+ "A3 Sportback":[2004,0,["35 TFSI 150|E|C|180|84|36.5","35 TDI 150|D|C|180|96|38.5","2.0 TDI 150|D|C|180|96|33.5"]],
  "A3 Sportback e-tron":[2014,2020,["1.4 TFSI e-tron 204|H|C|180|84|39.5"]],
  "A4 Allroad":[2009,0,["2.0 TDI 190|D|C|180|96|48.5","40 TDI 204|D|C|180|96|52.5"]],
+ "A4 Avant B9":[2015,0,["35 TDI 163|D|C|180|96|44.5","40 TDI 204|D|C|180|96|48.5","35 TFSI 150|E|C|180|84|41.5"]],
  "A4 B5":[1994,2001,["1.8 T 150|E|C|120|72|26.5","1.9 TDI 110|D|C|120|96|27.5"]],
  "A4 B6":[2000,2005,["1.9 TDI 130|D|C|120|96|28.5","2.0 130|E|C|120|72|29.5"]],
  "A4 B7":[2004,2008,["2.0 TDI 140|D|C|180|96|31.5","2.0 TFSI 200|E|N|||34.5"]],
@@ -1073,6 +1075,7 @@ const CAT = {
  "A4 B9":[2015,0,["35 TFSI 150|E|C|180|84|39.5","35 TDI 163|D|C|180|96|42.5","40 TDI 190|D|C|180|96|46.5"]],
  "A5":[2007,0,["2.0 TDI 190|D|C|180|96|45.5","40 TFSI 204|E|C|180|84|48.5"]],
  "A5 Sportback":[2009,0,["2.0 TDI 190|D|C|180|96|46.5","40 TFSI 204|E|C|180|84|48.5"]],
+ "A6 Avant C8":[2018,0,["40 TDI 204|D|C|180|96|58.5","45 TFSI 265|E|N|||64.5"]],
  "A6 C5":[1997,2004,["2.5 TDI 180|D|C|120|96|36.5","1.8 T 150|E|C|120|72|34.5"]],
  "A6 C6":[2004,2011,["2.0 TDI 140|D|C|180|96|42.5","3.0 TDI 233|D|N|||55.5"]],
  "A6 C7":[2011,2018,["2.0 TDI 190|D|C|180|96|48.5","3.0 TDI 272|D|N|||62.5"]],
@@ -1117,6 +1120,8 @@ const CAT = {
  "Série 3 E90":[2005,2012,["318d 143|D|N|||33.5","320d 177|D|N|||36.5","320i 170|E|N|||35.5"]],
  "Série 3 F30":[2012,2019,["318d 150|D|N|||36.5","320d 190|D|N|||40.5","320i 184|E|N|||39.5"]],
  "Série 3 G20":[2019,0,["318d 150|D|N|||44.5","320d 190|D|N|||48.5","330e 292|H|N|||53.5"]],
+ "Série 3 Touring F31":[2012,2019,["318d 150|D|N|||38.5","320d 190|D|N|||42.5"]],
+ "Série 3 Touring G21":[2019,0,["320d 190|D|N|||50.5","318d 150|D|N|||46.5","330e 292|H|N|||55.5"]],
  "Série 4":[2013,0,["420d 190|D|N|||48.5","420i 184|E|N|||47.5"]],
  "Série 4 Gran Coupé":[2014,0,["420d 190|D|N|||50.5","i4 eDrive35 286|L|-|||58.5"]],
  "Série 5 E39":[1995,2003,["525d 163|D|N|||38.5","530d 193|D|N|||42.5"]],
@@ -1124,6 +1129,7 @@ const CAT = {
  "Série 5 F10":[2010,2017,["520d 184|D|N|||49.5","530d 258|D|N|||62.5"]],
  "Série 5 G30":[2017,2023,["520d 190|D|N|||53.5","530e 292|H|N|||62.5"]],
  "Série 5 G60":[2023,0,["520d 197|D|N|||62.5","i5 eDrive40 340|L|-|||72.5"]],
+ "Série 5 Touring":[2003,0,["520d 190|D|N|||55.5","530d 265|D|N|||68.5"]],
  "Série 6":[2003,2018,["640d 313|D|N|||82.5","640i 320|E|N|||85.5"]],
  "Série 7":[2008,0,["730d 265|D|N|||98.5","740d 340|D|N|||115.5"]],
  "X1 E84":[2009,2015,["18d 143|D|N|||32.5","20d 184|D|N|||36.5"]],
@@ -1192,6 +1198,7 @@ const CAT = {
  "C5 Aircross II":[2025,0,["Hybrid 145|H|C|100|72|36.5","ë-C5 Aircross 213|L|-|||44.5"]],
  "C5 I":[2001,2008,["2.0 HDi 110|D|C|180|120|24.5","1.8 16v 117|E|C|120|72|22.5"]],
  "C5 II":[2008,2017,["1.6 HDi 112|D|C|180|120|28.5","2.0 HDi 150|D|C|180|120|33.5"]],
+ "C5 Tourer":[2008,2017,["1.6 HDi 112|D|C|180|120|29.5","2.0 HDi 150|D|C|180|120|34.5"]],
  "C5 X":[2021,2024,["1.2 PureTech 130|E|C|100|72|36.5","Hybrid 225|H|C|100|72|48.5"]],
  "C5 X (2025)":[2024,0,["Hybrid 145|H|C|100|72|40.5","Plug-in Hybrid 225|H|C|100|72|52.5"]],
  "C6":[2005,2012,["2.7 HDi V6 204|D|C|180|120|48.5"]],
@@ -1204,6 +1211,7 @@ const CAT = {
  "Nemo":[2008,2017,["1.4 HDi 70|D|C|180|120|14.5"]],
  "Saxo":[1996,2003,["1.1 60|E|C|120|72|9.5","1.4 75|E|C|120|72|10.9","1.5 D 58|D|C|120|72|11.5"]],
  "Xsara":[1997,2006,["1.4 75|E|C|120|72|14.5","1.6 16v 110|E|C|120|72|16.5","2.0 HDi 90|D|C|180|120|17.9"]],
+ "Xsara Break":[1997,2006,["1.6 16v 110|E|C|120|72|17.5","2.0 HDi 90|D|C|180|120|18.9"]],
  "Xsara Picasso":[1999,2012,["1.6 16v 110|E|C|120|72|18.5","1.6 HDi 110|D|C|180|120|20.5"]],
  "ZX":[1991,1998,["1.4 75|E|C|120|72|11.5","1.9 D 71|D|C|120|72|12.9"]]
 },
@@ -1282,6 +1290,7 @@ const CAT = {
  "Talento / Scudo":[2007,0,["1.6 MultiJet 120|D|C|120|72|28.5","2.0 MultiJet 145|D|C|180|120|32.5"]],
  "Tipo":[2016,0,["1.4 T-Jet 120|E|N|||18.5","1.6 MultiJet 120|D|C|180|120|21.5","1.0 FireFly 100|E|N|||19.5"]],
  "Tipo (ancien)":[1988,1995,["1.6 75|E|C|120|72|10.5","1.9 TD 90|D|C|120|72|12.5"]],
+ "Tipo SW":[2016,0,["1.6 MultiJet 120|D|C|180|120|22.5","1.4 T-Jet 120|E|N|||19.5","1.0 FireFly 100|E|N|||20.5"]],
  "Topolino":[2023,0,["Topolino 6 kW|L|-|||9.9"]],
  "Ulysse":[1994,2010,["2.0 JTD 136|D|C|180|120|28.5"]],
  "Uno":[1983,1995,["1.0 45|E|C|120|72|7.5","1.7 D 58|D|C|120|72|8.9"]]
@@ -1304,6 +1313,8 @@ const CAT = {
  "Focus III":[2011,2018,["1.0 EcoBoost 125|E|C|150|120|22.5","1.5 TDCi 120|D|C|180|120|25.5","1.6 TDCi 115|D|C|180|120|24.5"]],
  "Focus IV":[2018,2022,["1.0 EcoBoost 125|E|C|150|120|26.5","1.5 EcoBlue 120|D|C|180|120|29.5"]],
  "Focus IV restylé":[2022,0,["1.0 EcoBoost mHEV 125|E|C|150|120|28.5","1.0 EcoBoost mHEV 155|E|C|150|120|31.5"]],
+ "Focus SW III":[2011,2018,["1.6 TDCi 115|D|C|180|120|24.5","1.5 TDCi 120|D|C|180|120|26.5"]],
+ "Focus SW IV":[2018,0,["1.0 EcoBoost 125|E|C|150|120|27.5","1.5 EcoBlue 120|D|C|180|120|30.5"]],
  "Ka I/II":[1996,2016,["1.3 60|E|C|150|120|9.9","1.2 69|E|C|120|72|11.5"]],
  "Ka+":[2016,2020,["1.2 Ti-VCT 85|E|C|150|120|13.5"]],
  "Kuga I":[2008,2012,["2.0 TDCi 136|D|C|180|120|29.5"]],
@@ -1313,6 +1324,7 @@ const CAT = {
  "Maverick":[1993,2007,["2.0 16v 124|E|C|150|120|24.5"]],
  "Mondeo III":[2000,2007,["2.0 TDCi 130|D|C|180|120|26.5","1.8 16v 125|E|C|150|120|24.5"]],
  "Mondeo IV":[2014,2022,["2.0 TDCi 150|D|C|180|120|32.5","2.0 Hybride 187|H|N|||36.5"]],
+ "Mondeo SW":[2007,2022,["2.0 TDCi 150|D|C|180|120|33.5","2.0 EcoBlue 190|D|C|180|120|38.5"]],
  "Mustang":[2015,0,["2.3 EcoBoost 290|E|N|||48.5","5.0 V8 450|E|N|||62.5"]],
  "Mustang Mach-E":[2021,0,["Standard Range 269|L|-|||53.5","Extended Range 294|L|-|||62.5"]],
  "Puma":[2019,0,["1.0 EcoBoost mHEV 125|E|C|150|120|25.5","1.0 EcoBoost mHEV 155|E|C|150|120|29.5"]],
@@ -1375,7 +1387,9 @@ const CAT = {
  "i30 I":[2007,2012,["1.4 109|E|N|||18.5","1.6 CRDi 115|D|N|||21.5","2.0 CRDi 140|D|N|||23.5"]],
  "i30 II":[2012,2017,["1.4 100|E|N|||19.9","1.6 GDi 135|E|N|||21.5","1.6 CRDi 110|D|N|||23.5"]],
  "i30 III":[2017,0,["1.0 T-GDi 120|E|N|||22.9","1.4 T-GDi 140|E|N|||25.5","1.6 CRDi 115|D|N|||25.9"]],
+ "i30 SW":[2012,0,["1.6 CRDi 115|D|N|||24.5","1.0 T-GDi 120|E|N|||23.5","1.4 T-GDi 140|E|N|||26.5"]],
  "i40":[2011,2019,["1.7 CRDi 141|D|N|||29.5","1.6 GDi 135|E|N|||27.5"]],
+ "i40 SW":[2011,2019,["1.7 CRDi 141|D|N|||30.5","1.6 GDi 135|E|N|||28.5"]],
  "Inster":[2024,0,["Inster 49 kWh 115|L|-|||26.5"]],
  "Ioniq":[2016,2022,["Hybride 141|H|N|||29.5","Électrique 136|L|-|||36.5"]],
  "Ioniq 5":[2021,0,["Ioniq 5 58 kWh 170|L|-|||45.5","Ioniq 5 77 kWh 229|L|-|||52.5"]],
@@ -1437,6 +1451,7 @@ const CAT = {
  "Cee'd I":[2006,2012,["1.4 109|E|N|||18.5","1.6 CRDi 115|D|N|||21.5"]],
  "Cee'd II":[2012,2018,["1.4 100|E|N|||19.5","1.6 GDi 135|E|N|||21.5","1.6 CRDi 110|D|N|||22.9"]],
  "Ceed III":[2018,0,["1.0 T-GDi 120|E|N|||22.5","1.5 T-GDi 160|E|N|||25.5","1.6 CRDi 136|D|N|||26.5"]],
+ "Ceed SW":[2007,0,["1.6 CRDi 136|D|N|||25.5","1.0 T-GDi 120|E|N|||23.5","1.6 GDi PHEV 141|H|N|||36.5"]],
  "Cerato":[2004,2009,["1.6 105|E|N|||17.5","2.0 CRDi 113|D|N|||19.5"]],
  "EV3":[2024,0,["EV3 Long Range 204|L|-|||42.5"]],
  "EV6":[2021,0,["EV6 77 kWh 229|L|-|||52.5"]],
@@ -1502,11 +1517,11 @@ const CAT = {
  "LC":[2017,0,["LC 500h 359|H|N|||115.5"]],
  "LS":[2000,0,["LS 500h 359|H|N|||115.5"]],
  "NX":[2014,2021,["NX 350h 242|H|N|||56.5","NX 450h+ 309|H|N|||68.5"]],
- "NX 350h":[2021,0,["NX 350h 242|H|N|||57.5"]],
+ "NX 350h":[2021,0,["NX 350h (2.5 Hybride)|H|N|||57.5","NX 450h+ rechargeable|H|N|||68.5"]],
  "RX":[2009,0,["RX 450h 313|H|N|||72.5"]],
  "RX 450h+":[2022,0,["RX 450h+ 309|H|N|||82.5"]],
  "RZ":[2023,0,["RZ 450e 313|L|-|||72.5"]],
- "UX":[2019,2023,["UX 250h 184|H|N|||41.5","UX 300e 204|L|-|||52.5"]],
+ "UX":[2019,2023,["UX 250h (2.0 Hybride)|H|N|||41.5","UX 300e|L|-|||52.5"]],
  "UX (2023)":[2023,0,["UX 300h 199|H|N|||44.5"]]
 },
 "Ligier":{
@@ -1542,6 +1557,7 @@ const CAT = {
  "Mazda5 / Premacy":[1999,2015,["1.6 MZ-CD 115|D|C|180|120|24.5","2.0 MZR 146|E|N|||25.5"]],
  "Mazda6 I/II":[2002,2012,["2.0 MZR-CD 140|D|N|||27.5","2.2 MZR-CD 163|D|N|||30.5","2.0 MZR 147|E|N|||28.5"]],
  "Mazda6 III":[2012,2023,["2.0 Skyactiv-G 145|E|N|||30.5","2.2 Skyactiv-D 150|D|N|||34.5","2.2 Skyactiv-D 184|D|N|||38.5"]],
+ "Mazda6 SW":[2002,2023,["2.2 Skyactiv-D 150|D|N|||35.5","2.0 Skyactiv-G 145|E|N|||31.5","2.0 MZR-CD 140|D|N|||28.5"]],
  "MX-3":[1991,1998,["1.6 16v 107|E|C|120|72|16.5"]],
  "MX-5":[2015,0,["1.5 Skyactiv-G 132|E|N|||29.5","2.0 Skyactiv-G 184|E|N|||33.5"]],
  "MX-30":[2020,0,["MX-30 145|L|-|||36.5"]],
@@ -1559,11 +1575,14 @@ const CAT = {
  "Classe A W177":[2018,2022,["A180d 116|D|N|||35.5","A200 163|E|N|||37.5","A250e 218|H|N|||44.5"]],
  "Classe A W177 restylée":[2022,0,["A180d 116|D|N|||38.5","A250e 218|H|N|||46.5"]],
  "Classe B":[2011,0,["B180d 116|D|N|||33.5","B200 163|E|N|||35.5"]],
+ "Classe C Break S205":[2014,2021,["C200d 160|D|N|||42.5","C220d 194|D|N|||46.5"]],
+ "Classe C Break S206":[2021,0,["C200d 163|D|N|||51.5","C300e 313|H|N|||61.5"]],
  "Classe C W202":[1993,2000,["C220 CDI 125|D|N|||29.5","C180 122|E|C|120|72|28.5"]],
  "Classe C W203":[2000,2007,["C200 CDI 122|D|N|||32.5","C180 Kompressor 143|E|N|||33.5"]],
  "Classe C W204":[2007,2014,["C180 156|E|N|||37.5","C200 CDI 136|D|N|||38.5","C220 CDI 170|D|N|||42.5"]],
  "Classe C W205":[2014,2021,["C200d 160|D|N|||40.5","C220d 194|D|N|||44.5","C200 184|E|N|||43.5"]],
  "Classe C W206":[2021,0,["C200d 163|D|N|||49.5","C300e 313|H|N|||59.5"]],
+ "Classe E Break S213":[2016,2023,["E220d 194|D|N|||58.5","E300de 306|H|N|||68.5"]],
  "Classe E W210":[1995,2002,["E220 CDI 143|D|N|||38.5","E270 CDI 170|D|N|||43.5"]],
  "Classe E W211":[2002,2009,["E220 CDI 170|D|N|||48.5","E280 CDI 190|D|N|||56.5"]],
  "Classe E W212":[2009,2016,["E200 CDI 136|D|N|||49.5","E220 CDI 170|D|N|||53.5","E250 CDI 204|D|N|||58.5"]],
@@ -1671,6 +1690,7 @@ const CAT = {
  "Primastar":[2021,0,["2.0 dCi 150|D|C|120|72|33.5"]],
  "Primera":[1996,2007,["1.8 116|E|N|||19.5","2.2 dCi 136|D|C|120|72|23.5"]],
  "Pulsar":[2014,2018,["1.5 dCi 110|D|C|120|72|21.5","1.2 DIG-T 115|E|N|||20.5"]],
+ "Pulsar / Almera Tino break":[2000,2006,["2.2 dCi 136|D|C|120|72|19.5"]],
  "Qashqai I":[2007,2013,["1.5 dCi 106|D|C|120|72|22.5","1.6 16v 117|E|N|||21.5","2.0 dCi 150|D|C|120|72|26.5"]],
  "Qashqai II":[2013,2017,["1.2 DIG-T 115|E|N|||24.5","1.5 dCi 110|D|C|120|72|26.5","1.6 dCi 130|D|C|120|72|29.5"]],
  "Qashqai II restylé":[2017,2021,["1.3 DIG-T 140|E|N|||27.5","1.5 dCi 115|D|C|120|72|28.5"]],
@@ -1696,6 +1716,7 @@ const CAT = {
  "Astra J/K":[2009,2021,["1.4 Turbo 125|E|N|||22.5","1.6 CDTi 110|D|C|180|120|24.5","1.2 Turbo 130|E|C|100|72|25.5"]],
  "Astra L":[2021,0,["1.2 Turbo 130|E|C|100|72|29.5","1.5 Diesel 130|D|C|180|120|31.5","Hybrid 180|H|C|100|72|39.5"]],
  "Astra Sports Tourer":[2022,0,["1.2 Turbo 130|E|C|100|72|31.5","Astra Electric 156|L|-|||42.5"]],
+ "Astra Sports Tourer (ancienne)":[2010,2021,["1.6 CDTi 110|D|C|150|120|24.5","1.4 Turbo 125|E|N|||23.5"]],
  "Calibra":[1990,1997,["2.0 16v 150|E|C|120|72|22.5"]],
  "Cascada":[2013,2019,["1.6 Turbo 170|E|N|||30.5","2.0 CDTi 165|D|N|||32.5"]],
  "Combo":[2018,0,["1.5 Diesel 100|D|C|180|120|24.5","1.2 Turbo 110|E|C|100|72|23.5"]],
@@ -1710,6 +1731,7 @@ const CAT = {
  "Grandland I":[2018,2024,["1.2 Turbo 130|E|C|100|72|30.5","1.5 Diesel 130|D|C|180|120|32.5","Hybrid 225|H|C|100|72|45.5"]],
  "Grandland II":[2024,0,["1.2 Hybrid 136|H|C|100|72|35.5","Grandland Electric 213|L|-|||46.5"]],
  "Insignia":[2008,2022,["2.0 CDTi 170|D|C|180|120|33.5","1.5 Turbo 165|E|C|100|72|32.5"]],
+ "Insignia Sports Tourer":[2009,2022,["1.6 CDTi 136|D|C|150|120|30.5","2.0 CDTi 170|D|N|||34.5","1.5 Turbo 165|E|C|100|72|33.5"]],
  "Karl":[2015,2019,["1.0 75|E|N|||11.5"]],
  "Meriva":[2003,2017,["1.4 Turbo 120|E|N|||19.5","1.7 CDTi 110|D|N|||21.5","1.6 CDTi 110|D|C|150|120|23.5"]],
  "Mokka A":[2012,2016,["1.7 CDTi 130|D|N|||24.5","1.4 Turbo 140|E|N|||23.5"]],
@@ -1733,23 +1755,30 @@ const CAT = {
  "108":[2014,2022,["1.0 VTi 72|E|N|||11.5","1.2 PureTech 82|E|C|100|72|14.5"]],
  "205":[1983,1998,["1.1 60|E|C|120|72|8.5","1.4 75|E|C|120|72|9.9","1.9 GTi 122|E|C|120|72|14.5","1.8 D 60|D|C|120|72|10.9"]],
  "206":[1998,2012,["1.4 75|E|C|120|72|12.5","1.6 16v 110|E|C|120|72|15.5","1.4 HDi 70|D|C|180|120|14.5"]],
+ "206 SW":[2002,2007,["1.4 75|E|C|120|72|13.5","1.4 HDi 70|D|C|180|120|14.9"]],
  "206+":[2009,2012,["1.1 60|E|C|120|72|11.5","1.4 HDi 70|D|C|180|120|13.5"]],
  "207":[2006,2014,["1.4 VTi 95|E|N|||14.9","1.6 VTi 120|E|N|||17.5","1.6 HDi 92|D|C|180|120|18.5"]],
  "207 CC":[2007,2014,["1.6 VTi 120|E|N|||22.5","1.6 THP 156|E|N|||25.5"]],
+ "207 SW":[2007,2013,["1.6 VTi 120|E|N|||18.5","1.6 HDi 92|D|C|180|120|19.5"]],
  "208 I":[2012,2019,["1.0 VTi 68|E|N|||13.9","1.2 PureTech 82|E|C|100|72|16.5","1.2 PureTech 110|E|C|100|72|19.5","1.6 BlueHDi 100|D|C|180|120|20.5"]],
  "208 II":[2019,0,["1.2 PureTech 75|E|C|100|72|17.5","1.2 PureTech 100|E|C|100|72|21.5","1.5 BlueHDi 100|D|C|180|120|23.5","e-208 136|L|-|||32.5"]],
  "306":[1993,2002,["1.4 75|E|C|120|72|13.5","1.6 90|E|C|120|72|14.9","1.9 D 70|D|C|120|72|15.5","2.0 HDi 90|D|C|180|120|17.5"]],
  "307":[2001,2008,["1.6 16v 110|E|C|120|72|17.5","2.0 HDi 110|D|C|180|120|20.5"]],
+ "307 SW":[2002,2008,["1.6 16v 110|E|C|120|72|19.5","2.0 HDi 110|D|C|180|120|22.5"]],
  "308 CC":[2009,2015,["1.6 THP 156|E|N|||29.5","2.0 HDi 163|D|C|180|120|31.5"]],
  "308 I":[2007,2013,["1.6 VTi 120|E|N|||19.5","1.6 HDi 112|D|C|180|120|22.5"]],
  "308 II":[2013,2021,["1.2 PureTech 110|E|C|100|72|22.5","1.2 PureTech 130|E|C|100|72|25.5","1.5 BlueHDi 130|D|C|180|120|28.9","2.0 BlueHDi 150|D|C|180|120|31.5"]],
  "308 III":[2021,2025,["1.2 PureTech 130|E|C|100|72|29.5","1.5 BlueHDi 130|D|C|180|120|31.5","Hybrid 180|H|C|100|72|39.5"]],
  "308 III restylé":[2025,0,["1.2 Hybrid 145|H|C|100|72|32.5","e-308 156|L|-|||42.5"]],
+ "308 SW II":[2014,2021,["1.2 PureTech 130|E|C|100|72|26.5","1.5 BlueHDi 130|D|C|180|120|29.9","2.0 BlueHDi 150|D|C|180|120|32.5"]],
+ "308 SW III":[2021,0,["1.2 PureTech 130|E|C|100|72|30.5","1.5 BlueHDi 130|D|C|180|120|32.5","Hybrid 180|H|C|100|72|40.5"]],
  "309":[1985,1993,["1.4 75|E|C|120|72|9.5","1.9 D 64|D|C|120|72|10.5"]],
  "405":[1987,1997,["1.6 90|E|C|120|72|13.5","1.9 TD 92|D|C|120|72|15.5"]],
  "406":[1995,2004,["1.8 16v 117|E|C|120|72|19.5","2.0 HDi 110|D|C|180|120|22.5","2.2 HDi 136|D|C|180|120|25.5"]],
+ "406 Break":[1996,2004,["2.0 HDi 110|D|C|180|120|23.5","1.8 16v 117|E|C|120|72|20.5"]],
  "407":[2004,2011,["1.6 HDi 110|D|C|180|120|24.5","2.0 HDi 136|D|C|180|120|27.5","2.0 16v 140|E|C|120|72|25.5"]],
  "407 Coupé":[2005,2011,["2.7 HDi V6 204|D|C|180|120|42.5"]],
+ "407 SW":[2004,2011,["1.6 HDi 110|D|C|180|120|25.5","2.0 HDi 136|D|C|180|120|28.5"]],
  "408":[2022,0,["1.2 PureTech 130|E|C|100|72|33.5","Hybrid 180|H|C|100|72|42.5"]],
  "505":[1979,1992,["2.0 110|E|C|120|72|14.5"]],
  "508 I":[2011,2018,["1.6 HDi 115|D|C|180|120|28.5","2.0 HDi 140|D|C|180|120|32.5","1.6 THP 165|E|N|||31.5"]],
@@ -1806,6 +1835,8 @@ const CAT = {
  "Captur I":[2013,2019,["0.9 TCe 90|E|N|||18.9","1.2 TCe 120|E|N|||22.5","1.5 dCi 90|D|C|120|72|21.9"]],
  "Captur II":[2019,2024,["1.0 TCe 90|E|N|||21.5","1.3 TCe 140|E|N|||26.5","1.5 Blue dCi 115|D|C|120|72|26.9","E-Tech 145|H|N|||30.5"]],
  "Captur II restylé":[2024,0,["1.0 TCe 90|E|N|||23.5","E-Tech 145|H|N|||31.5"]],
+ "Clio Estate IV":[2013,2019,["0.9 TCe 90|E|N|||17.5","1.5 dCi 90|D|C|120|72|19.5"]],
+ "Clio Grandtour III":[2008,2012,["1.5 dCi 85|D|C|120|72|15.5","1.2 16v 75|E|C|120|72|14.5"]],
  "Clio I":[1990,1998,["1.2 60|E|C|120|72|9.5","1.4 80|E|C|120|72|11.5","1.9 D 65|D|C|120|72|11.9"]],
  "Clio II":[1998,2006,["1.2 16v 75|E|C|120|72|11.5","1.4 16v 98|E|C|120|72|13.5","1.5 dCi 65|D|C|120|72|13.9","1.5 dCi 85|D|C|120|72|14.9"]],
  "Clio III":[2005,2012,["1.2 16v 75|E|C|120|72|13.5","1.5 dCi 85|D|C|120|72|16.5","1.6 16v 110|E|C|120|72|17.5"]],
@@ -1827,6 +1858,7 @@ const CAT = {
  "Kangoo III":[2021,0,["1.3 TCe 130|E|N|||24.5","1.5 Blue dCi 115|D|C|120|72|25.5","E-Tech 90|L|-|||38.5"]],
  "Koleos I":[2008,2015,["2.0 dCi 150|D|C|120|72|30.5"]],
  "Koleos II":[2017,2022,["1.6 dCi 130|D|C|120|72|32.5","2.0 dCi 175|D|C|120|72|38.5"]],
+ "Laguna Estate III":[2007,2015,["1.5 dCi 110|D|C|120|72|25.5","2.0 dCi 150|D|C|120|72|30.5"]],
  "Laguna II":[2001,2007,["1.8 16v 120|E|C|120|72|21.5","1.9 dCi 120|D|C|120|72|23.5","2.0 dCi 150|D|C|120|72|26.5"]],
  "Laguna III":[2007,2015,["1.5 dCi 110|D|C|120|72|24.5","2.0 dCi 150|D|C|120|72|29.5"]],
  "Latitude":[2011,2015,["2.0 dCi 150|D|C|120|72|30.5"]],
@@ -1835,6 +1867,8 @@ const CAT = {
  "Master III":[2010,2024,["2.3 dCi 135|D|C|120|72|30.5","2.3 Blue dCi 150|D|C|120|72|34.5"]],
  "Master IV":[2024,0,["2.0 Blue dCi 150|D|C|120|72|38.5","Master E-Tech 105 kW|L|-|||62.5"]],
  "Mégane E-Tech électrique":[2022,0,["EV40 130|L|-|||37.5","EV60 220|L|-|||42.5"]],
+ "Mégane Estate III":[2009,2016,["1.5 dCi 110|D|C|120|72|23.5","1.6 16v 110|E|C|120|72|20.5","1.2 TCe 130|E|N|||23.9"]],
+ "Mégane Estate IV":[2016,2022,["1.3 TCe 140|E|N|||26.5","1.5 Blue dCi 115|D|C|120|72|27.5","1.6 E-Tech 160|H|N|||34.5"]],
  "Mégane I":[1995,2002,["1.4 16v 95|E|C|120|72|14.5","1.6 16v 107|E|C|120|72|16.5","1.9 dTi 80|D|C|120|72|16.9"]],
  "Mégane II":[2002,2008,["1.4 16v 98|E|C|120|72|16.5","1.6 16v 110|E|C|120|72|18.5","1.5 dCi 105|D|C|120|72|19.5","1.9 dCi 130|D|C|120|72|22.5"]],
  "Mégane III":[2008,2016,["1.6 16v 110|E|C|120|72|19.5","1.5 dCi 110|D|C|120|72|22.5","1.2 TCe 130|E|N|||22.9"]],
@@ -1852,6 +1886,7 @@ const CAT = {
  "Super 5":[1984,1996,["1.4 60|E|C|120|72|8.5","1.7 GTS 90|E|C|120|72|10.5"]],
  "Symbioz":[2024,0,["1.6 E-Tech 145|H|N|||32.5"]],
  "Talisman":[2015,2022,["1.5 dCi 110|D|C|120|72|29.5","1.6 dCi 160|D|C|120|72|35.5","1.3 TCe 160|E|N|||33.5"]],
+ "Talisman Estate":[2016,2022,["1.5 dCi 110|D|C|120|72|30.5","1.6 dCi 160|D|C|120|72|36.5","1.3 TCe 160|E|N|||34.5"]],
  "Trafic E-Tech":[2023,0,["Trafic E-Tech 122|L|-|||48.5"]],
  "Trafic II":[2001,2014,["1.9 dCi 100|D|C|120|72|22.5","2.0 dCi 115|D|C|120|72|25.5"]],
  "Trafic III":[2014,0,["1.6 dCi 120|D|C|120|72|27.5","2.0 Blue dCi 150|D|C|120|72|32.5"]],
@@ -1879,6 +1914,7 @@ const CAT = {
  "Ibiza II":[1993,2002,["1.4 60|E|C|120|72|11.5","1.9 TDI 90|D|C|120|96|13.5"]],
  "Ibiza III":[2002,2008,["1.4 16v 75|E|C|120|72|13.5","1.9 TDI 100|D|C|120|96|15.5"]],
  "Ibiza IV":[2008,2017,["1.2 TSI 90|E|C|180|84|15.5","1.6 TDI 90|D|C|180|96|17.5"]],
+ "Ibiza ST":[2010,2017,["1.2 TSI 90|E|C|180|84|16.5","1.6 TDI 90|D|C|180|96|18.5"]],
  "Ibiza V":[2017,0,["1.0 TSI 95|E|C|180|84|17.5","1.0 TSI 110|E|C|180|84|20.5","1.6 TDI 95|D|C|180|96|21.5"]],
  "Inca":[1995,2003,["1.9 D 64|D|C|120|72|12.5"]],
  "Leon I":[1999,2006,["1.6 16v 105|E|C|120|72|17.5","1.9 TDI 110|D|C|120|96|19.5"]],
@@ -1886,6 +1922,7 @@ const CAT = {
  "Leon III":[2012,2020,["1.2 TSI 110|E|C|180|84|22.5","1.6 TDI 115|D|C|180|96|25.5","2.0 TDI 150|D|C|180|96|28.5"]],
  "Leon IV":[2020,2024,["1.0 TSI 110|E|C|180|84|26.5","1.5 TSI 150|E|C|180|84|29.5","2.0 TDI 150|D|C|180|96|32.5"]],
  "Leon IV restylé":[2024,0,["1.5 TSI 150|E|C|180|84|30.5","2.0 TDI 150|D|C|180|96|33.5"]],
+ "Leon ST":[2013,0,["1.5 TSI 150|E|C|180|84|28.5","2.0 TDI 150|D|C|180|96|31.5","1.6 TDI 115|D|C|180|96|27.5"]],
  "Mii":[2012,2021,["1.0 60|E|C|180|84|10.5","Mii electric 83|L|-|||21.5"]],
  "Tarraco":[2018,0,["1.5 TSI 150|E|C|180|84|36.5","2.0 TDI 150|D|C|180|96|39.5"]],
  "Toledo":[1991,2019,["1.2 TSI 105|E|C|180|84|17.5","1.6 TDI 105|D|C|180|96|19.5"]]
@@ -1895,6 +1932,7 @@ const CAT = {
  "Elroq":[2024,0,["Elroq 60 204|L|-|||38.5","Elroq 85 286|L|-|||45.5"]],
  "Enyaq":[2021,0,["Enyaq 60 179|L|-|||45.5","Enyaq 85 286|L|-|||52.5"]],
  "Enyaq Coupé":[2021,0,["Enyaq Coupé 85 286|L|-|||55.5"]],
+ "Fabia Combi":[2007,2021,["1.0 TSI 95|E|C|180|84|18.5","1.6 TDI 90|D|C|180|96|19.5"]],
  "Fabia I":[1999,2007,["1.2 12v 64|E|N|||11.5","1.4 16v 75|E|C|120|72|12.5","1.9 TDI 100|D|C|120|96|14.5"]],
  "Fabia II":[2007,2014,["1.2 TSI 86|E|C|180|84|14.5","1.6 TDI 90|D|C|180|96|16.5"]],
  "Fabia III":[2014,2021,["1.0 TSI 95|E|C|180|84|17.5","1.0 MPI 75|E|C|180|84|14.5"]],
@@ -1905,6 +1943,8 @@ const CAT = {
  "Karoq":[2017,0,["1.0 TSI 110|E|C|180|84|28.5","2.0 TDI 150|D|C|180|96|34.5"]],
  "Kodiaq I":[2016,2024,["1.5 TSI 150|E|C|180|84|36.5","2.0 TDI 150|D|C|180|96|39.5"]],
  "Kodiaq II":[2024,0,["1.5 TSI 150|E|C|180|84|40.5","2.0 TDI 150|D|C|180|96|43.5","iV 204|H|C|180|84|50.5"]],
+ "Octavia Combi III":[2013,2020,["1.6 TDI 115|D|C|180|96|26.5","2.0 TDI 150|D|C|180|96|30.5","1.0 TSI 115|E|C|180|84|24.5"]],
+ "Octavia Combi IV":[2020,0,["1.5 TSI 150|E|C|180|84|31.5","2.0 TDI 150|D|C|180|96|34.5"]],
  "Octavia I":[1996,2010,["1.6 102|E|C|120|72|17.5","1.9 TDI 105|D|C|120|96|19.5"]],
  "Octavia II":[2004,2013,["1.6 102|E|C|120|72|19.5","1.9 TDI 105|D|C|120|96|22.5","2.0 TDI 140|D|C|180|96|25.5"]],
  "Octavia III":[2013,2020,["1.0 TSI 115|E|C|180|84|23.5","1.6 TDI 115|D|C|180|96|25.5","2.0 TDI 150|D|C|180|96|29.5"]],
@@ -1913,6 +1953,7 @@ const CAT = {
  "Rapid / Rapid Spaceback":[2012,2019,["1.2 TSI 105|E|C|180|84|18.5","1.6 TDI 90|D|C|180|96|20.5"]],
  "Roomster":[2006,2015,["1.2 TSI 105|E|C|180|84|17.5","1.6 TDI 90|D|C|180|96|19.5"]],
  "Scala":[2019,0,["1.0 TSI 110|E|C|180|84|23.5","1.5 TSI 150|E|C|180|84|27.5"]],
+ "Superb Combi":[2009,0,["2.0 TDI 150|D|C|180|96|38.5","1.5 TSI 150|E|C|180|84|36.5","iV 218|H|C|180|84|46.5"]],
  "Superb I/II":[2001,2015,["2.0 TDI 140|D|C|180|96|30.5","1.8 TSI 160|E|N|||31.5"]],
  "Superb III":[2015,2024,["2.0 TDI 150|D|C|180|96|36.5","1.5 TSI 150|E|C|180|84|34.5"]],
  "Superb IV":[2024,0,["1.5 TSI 150|E|C|180|84|38.5","2.0 TDI 150|D|C|180|96|41.5"]],
@@ -1982,23 +2023,25 @@ const CAT = {
 "Toyota":{
  "Auris":[2007,2018,["1.33 VVT-i 99|E|N|||18.5","1.4 D-4D 90|D|N|||20.5","Hybride 136|H|N|||24.5"]],
  "Auris II":[2012,2018,["1.33 VVT-i 99|E|N|||19.5","1.4 D-4D 90|D|N|||21.5","1.8 Hybride 136|H|N|||25.5"]],
+ "Auris Touring Sports":[2013,2018,["1.8 Hybride 136|H|N|||26.5","1.4 D-4D 90|D|N|||22.5","1.33 VVT-i 99|E|N|||20.5"]],
  "Avensis":[1997,2018,["1.6 VVT-i 132|E|N|||24.5","2.0 D-4D 124|D|N|||27.5","2.2 D-4D 150|D|N|||30.5"]],
+ "Avensis SW":[2003,2018,["2.0 D-4D 143|D|N|||29.5","1.6 D-4D 112|D|N|||27.5","1.8 VVT-i 147|E|N|||28.5"]],
  "Avensis Verso":[2001,2009,["2.0 D-4D 116|D|N|||26.5"]],
  "Aygo I":[2005,2014,["1.0 VVT-i 68|E|N|||9.9","1.4 HDi 54|D|C|180|120|11.5"]],
  "Aygo II":[2014,2022,["1.0 VVT-i 72|E|N|||11.9"]],
  "Aygo X":[2022,0,["1.0 VVT-i 72|E|N|||16.5"]],
  "bZ4X":[2022,0,["bZ4X 204|L|-|||47.5"]],
- "C-HR I":[2016,2023,["1.8 Hybride 122|H|N|||29.5","2.0 Hybride 184|H|N|||34.5"]],
- "C-HR II":[2023,0,["1.8 Hybride 140|H|N|||34.5","2.0 Hybride 198|H|N|||39.5"]],
+ "C-HR I":[2016,2023,["122h (1.8 Hybride)|H|N|||29.5","184h (2.0 Hybride)|H|N|||34.5"]],
+ "C-HR II":[2023,0,["140h (1.8 Hybride)|H|N|||34.5","198h (2.0 Hybride)|H|N|||39.5"]],
  "C-HR PHEV":[2024,0,["2.0 Hybride rechargeable 223|H|N|||46.5"]],
- "Camry":[2019,2023,["2.5 Hybride 218|H|N|||39.5"]],
+ "Camry":[2019,2023,["218h (2.5 Hybride)|H|N|||39.5"]],
  "Celica":[1993,2006,["1.8 VVT-i 143|E|N|||26.5","1.8 VVTL-i 192|E|N|||31.5"]],
- "Corolla Cross":[2022,0,["2.0 Hybride 197|H|N|||35.5"]],
+ "Corolla Cross":[2022,0,["197h (2.0 Hybride)|H|N|||35.5","197h AWD-i|H|N|||39.5"]],
  "Corolla E11":[1997,2002,["1.4 VVT-i 97|E|N|||15.5","2.0 D-4D 90|D|N|||17.5"]],
  "Corolla E12/E15":[2002,2013,["1.4 VVT-i 97|E|N|||17.5","1.4 D-4D 90|D|N|||19.5","2.0 D-4D 126|D|N|||22.5"]],
- "Corolla Touring Sports":[2019,0,["1.8 Hybride 122|H|N|||30.5","2.0 Hybride 196|H|N|||35.5"]],
+ "Corolla Touring Sports":[2019,0,["122h (1.8 Hybride)|H|N|||30.5","140h (1.8 Hybride)|H|N|||32.5","184h (2.0 Hybride)|H|N|||35.5","196h (2.0 Hybride)|H|N|||36.5","1.2 Turbo 116|E|N|||27.5"]],
  "Corolla Verso":[2004,2009,["1.8 VVT-i 129|E|N|||21.5","2.2 D-4D 136|D|N|||24.5"]],
- "Corolla XII":[2019,0,["1.8 Hybride 122|H|N|||28.5","2.0 Hybride 184|H|N|||33.5","1.2 Turbo 116|E|N|||25.5"]],
+ "Corolla XII":[2019,0,["122h (1.8 Hybride)|H|N|||28.5","184h (2.0 Hybride)|H|N|||33.5","196h (2.0 Hybride)|H|N|||35.5","1.2 Turbo 116|E|N|||25.5"]],
  "GR Yaris":[2020,0,["1.6 Turbo 261|E|N|||38.5","1.6 Turbo 280|E|N|||45.5"]],
  "Hilux":[2005,0,["2.5 D-4D 144|D|N|||32.5","2.4 D-4D 150|D|N|||38.5","2.8 D-4D 204|D|N|||45.5"]],
  "iQ":[2009,2015,["1.0 VVT-i 68|E|N|||13.5"]],
@@ -2009,25 +2052,25 @@ const CAT = {
  "Prius II":[2003,2009,["1.5 Hybride 113|H|N|||25.5"]],
  "Prius III":[2009,2016,["1.8 Hybride 136|H|N|||28.5"]],
  "Prius IV":[2016,2022,["1.8 Hybride 122|H|N|||30.5","1.8 Hybride rechargeable 122|H|N|||38.5"]],
- "Prius V":[2023,0,["2.0 Hybride rechargeable 223|H|N|||45.5"]],
+ "Prius V":[2023,0,["223h rechargeable (2.0 Hybride)|H|N|||45.5"]],
  "Prius+":[2012,2021,["1.8 Hybride 136|H|N|||32.5"]],
  "Proace":[2016,0,["1.5 D-4D 120|D|C|180|120|29.5","2.0 D-4D 180|D|C|180|120|37.5"]],
  "Proace City":[2019,0,["1.5 D-4D 100|D|C|180|120|24.5","1.2 Turbo 110|E|C|100|72|23.5","Proace City Electric 136|L|-|||37.5"]],
  "Proace Verso":[2016,0,["2.0 D-4D 180|D|C|180|120|42.5","Proace Verso Electric 136|L|-|||52.5"]],
  "RAV4 II":[2000,2006,["2.0 D-4D 116|D|N|||27.5","2.0 VVT-i 150|E|N|||26.5"]],
  "RAV4 III/IV":[2006,2018,["2.0 D-4D 124|D|N|||31.5","2.2 D-4D 150|D|N|||34.5","2.5 Hybride 197|H|N|||36.5"]],
- "RAV4 V":[2019,0,["2.5 Hybride 218|H|N|||40.5","Hybride rechargeable 306|H|N|||55.5"]],
+ "RAV4 V":[2019,0,["218h (2.5 Hybride)|H|N|||40.5","222h AWD-i|H|N|||44.5","306h rechargeable|H|N|||55.5"]],
  "Starlet":[1989,1999,["1.3 75|E|C|120|72|11.5"]],
  "Supra":[2019,0,["2.0 Turbo 258|E|N|||58.5","3.0 Turbo 340|E|N|||72.5"]],
  "Urban Cruiser":[2009,2014,["1.33 VVT-i 101|E|N|||17.5","1.4 D-4D 90|D|N|||19.5"]],
  "Urban Cruiser électrique":[2025,0,["Urban Cruiser BEV 174|L|-|||36.5"]],
  "Verso":[2009,2018,["1.6 D-4D 112|D|N|||24.5","1.8 VVT-i 147|E|N|||25.5"]],
- "Yaris Cross":[2021,2024,["Hybride 116|H|N|||27.5","Hybride 130|H|N|||31.5"]],
- "Yaris Cross (2024)":[2024,0,["1.5 Hybride 130|H|N|||29.5","1.5 Hybride AWD-i 132|H|N|||33.5"]],
+ "Yaris Cross":[2021,2024,["116h (1.5 Hybride)|H|N|||27.5","130h (1.5 Hybride)|H|N|||31.5"]],
+ "Yaris Cross (2024)":[2024,0,["130h (1.5 Hybride)|H|N|||29.5","132h AWD-i|H|N|||33.5"]],
  "Yaris I":[1999,2005,["1.0 VVT-i 65|E|N|||11.5","1.4 D-4D 75|D|N|||13.5"]],
  "Yaris II":[2005,2011,["1.0 VVT-i 69|E|N|||12.5","1.33 VVT-i 101|E|N|||14.5","1.4 D-4D 90|D|N|||15.9"]],
  "Yaris III":[2011,2020,["1.0 VVT-i 69|E|N|||13.9","1.33 VVT-i 99|E|N|||16.5","Hybride 100|H|N|||19.5"]],
- "Yaris IV":[2020,0,["1.5 VVT-iE 125|E|N|||21.5","Hybride 116|H|N|||25.5","Hybride 130|H|N|||28.5"]],
+ "Yaris IV":[2020,0,["116h (1.5 Hybride)|H|N|||25.5","130h (1.5 Hybride)|H|N|||28.5","1.5 VVT-iE 125|E|N|||21.5"]],
  "Yaris Verso":[1999,2005,["1.3 VVT-i 86|E|N|||15.5","1.4 D-4D 75|D|N|||17.5"]]
 },
 "Volkswagen":{
@@ -2044,6 +2087,8 @@ const CAT = {
  "Golf III":[1991,1997,["1.6 75|E|C|120|72|13.5","1.9 TDI 90|D|C|120|96|15.5"]],
  "Golf IV":[1997,2003,["1.4 16v 75|E|C|120|72|16.5","1.6 16v 105|E|C|120|72|18.5","1.9 TDI 110|D|C|120|96|20.5"]],
  "Golf Sportsvan":[2014,2020,["1.2 TSI 110|E|C|180|84|24.5","1.6 TDI 115|D|C|180|96|26.5"]],
+ "Golf SW VII":[2013,2020,["1.2 TSI 110|E|C|180|84|24.5","1.6 TDI 115|D|C|180|96|27.5","2.0 TDI 150|D|C|180|96|30.5"]],
+ "Golf SW VIII":[2020,0,["1.5 eTSI 150|E|C|180|84|31.5","2.0 TDI 150|D|C|180|96|34.5"]],
  "Golf V":[2003,2008,["1.4 16v 80|E|C|120|72|18.5","1.4 TSI 140|E|N|||23.5","1.9 TDI 105|D|C|120|96|22.5","2.0 TDI 140|D|C|120|96|25.5"]],
  "Golf VI":[2008,2012,["1.4 TSI 122|E|N|||21.5","1.6 TDI 105|D|C|180|96|23.5","2.0 TDI 140|D|C|180|96|26.5"]],
  "Golf VII":[2012,2020,["1.2 TSI 105|E|C|180|84|22.5","1.4 TSI 125|E|C|180|84|25.5","1.6 TDI 115|D|C|180|96|26.5","2.0 TDI 150|D|C|180|96|29.5"]],
@@ -2064,6 +2109,7 @@ const CAT = {
  "Passat B7":[2010,2014,["1.6 TDI 105|D|C|180|96|29.5","2.0 TDI 140|D|C|180|96|32.5"]],
  "Passat B8":[2014,2023,["1.5 TSI 150|E|C|180|84|33.5","2.0 TDI 150|D|C|180|96|36.5","GTE 218|H|C|180|84|46.5"]],
  "Passat B9":[2024,0,["1.5 eTSI 150|E|C|180|84|42.5","2.0 TDI 150|D|C|180|96|45.5","eHybrid 204|H|C|180|84|52.5"]],
+ "Passat SW B8":[2015,2023,["1.5 TSI 150|E|C|180|84|34.5","2.0 TDI 150|D|C|180|96|37.5","GTE 218|H|C|180|84|47.5"]],
  "Polo III":[1994,2001,["1.4 60|E|C|120|72|12.5","1.9 SDI 64|D|C|120|96|13.5"]],
  "Polo IV":[2001,2009,["1.2 12v 64|E|N|||13.5","1.4 16v 80|E|C|120|72|14.5","1.4 TDI 80|D|C|180|96|15.5"]],
  "Polo V":[2009,2017,["1.2 TSI 90|E|C|180|84|16.5","1.6 TDI 90|D|C|180|96|18.5","1.4 TDI 75|D|C|180|96|17.5"]],
@@ -2150,16 +2196,60 @@ function normTexte(s){
   return String(s||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"")
     .replace(/[^a-z0-9]+/g," ").trim();
 }
-/* Sept cent cinquante libellés normalisés une fois pour toutes : les refaire à
-   chaque touche, c'était mille cinq cents normalisations par lettre tapée. */
+/* Un constructeur n'appelle pas un break « break » : c'est un SW chez Peugeot,
+   un Touring Sports chez Toyota, un Avant chez Audi, un Combi chez Skoda. On
+   cherche avec les mots de l'acheteur, pas ceux du service marketing. */
+const G_BREAK = ["break","sw","estate","touring sports","touring","variant","avant",
+                 "sportswagon","sports tourer","tourer","combi","grandtour","mcv",
+                 "shooting brake","caravan"];
+const G_MONO  = ["picasso","verso","scenic","touran","zafira","spacetourer","multivan",
+                 "galaxy","sharan","alhambra","espace","ulysse","evasion","meriva",
+                 "active tourer","gran tourer","grand c4"];
+const G_CAB   = ["cabrio","cabriolet","cc","roadster","spider","eos","cascada",
+                 "barchetta","streetka","z4","boxster","mx-5","a110"];
+const G_COUPE = ["coupe","rcz","gran coupe","celica","calibra","brera","scirocco",
+                 "cougar","corrado","tt","cayman","supra","brz"];
+const G_UTIL  = ["kangoo","berlingo","partner","rifter","trafic","vivaro","master",
+                 "movano","ducato","boxer","jumper","jumpy","expert","transit",
+                 "crafter","sprinter","transporter","caddy","combo","doblo","daily",
+                 "nv200","townstar","proace","talento","scudo","express","bipper",
+                 "nemo","fiorino","primastar","interstar","inca","kubistar"];
+const SYNONYMES = {};
+const groupe = (mots, g) => mots.forEach(m => { SYNONYMES[m] = g; });
+groupe(["break","sw","estate","wagon","familiale","combi","kombi","touring"], G_BREAK);
+groupe(["monospace","ludospace","7 places","sept places"], G_MONO);
+groupe(["cabriolet","cabrio","decapotable","roadster","spider"], G_CAB);
+groupe(["coupe"], G_COUPE);
+groupe(["utilitaire","fourgon","camionnette","vu","fourgonnette"], G_UTIL);
+
+/* Mille libellés normalisés une fois pour toutes : les refaire à chaque touche,
+   c'était deux mille normalisations Unicode par lettre tapée. */
 let _index = null;
 function indexCat(){
   if(_index) return _index;
   _index = [];
   MARQUES.forEach(m => Object.keys(CAT[m]).forEach(mo => {
-    _index.push({ marque:m, modele:mo, h:normTexte(m + " " + mo) });
+    const e = CAT[m][mo];
+    // Les noms de motorisation entrent dans l'index : on cherche aussi bien
+    // « 122h » ou « BlueHDi 130 » qu'un nom de modèle.
+    const h = normTexte(m + " " + mo + " " + e[2].map(x => String(x).split("|")[0]).join(" "));
+    _index.push({ marque:m, modele:mo, h, hs:" " + h + " " });
   }));
   return _index;
+}
+/* Ce que tape la personne se cherche en début de mot comme au milieu — « coro »
+   doit trouver Corolla. Un synonyme, lui, se cherche en mot entier : « sw » est
+   caché dans « volkswagen », « tt » dans « Giulietta », et un break n'est ni
+   l'un ni l'autre. */
+function correspond(h, hs, t){
+  if(h.indexOf(t) >= 0) return true;
+  const syn = SYNONYMES[t];
+  if(!syn) return false;
+  for(let i = 0; i < syn.length; i++){
+    const x = normTexte(syn[i]);
+    if(x.indexOf(" ") >= 0 ? h.indexOf(x) >= 0 : hs.indexOf(" " + x + " ") >= 0) return true;
+  }
+  return false;
 }
 function chercherModele(q){
   const toks = normTexte(q).split(" ").filter(Boolean);
@@ -2168,7 +2258,7 @@ function chercherModele(q){
   for(let i = 0; i < idx.length && r.length < 40; i++){
     const e = idx[i];
     let ok = true;
-    for(let t = 0; t < toks.length; t++){ if(e.h.indexOf(toks[t]) < 0){ ok = false; break; } }
+    for(let t = 0; t < toks.length; t++){ if(!correspond(e.h, e.hs, toks[t])){ ok = false; break; } }
     if(ok) r.push(e);
   }
   return r;
@@ -2190,7 +2280,8 @@ const FINITIONS = {
  "BMW":["Lounge","Business","Sport Line","Luxury","M Sport","M Sport Pro"],
  "Mercedes-Benz":["Style","Business","Progressive","Avantgarde","AMG Line","Exclusive"],
  "Mini":["Essential","Classic","Business","Favoured","Resolute","John Cooper Works"],
- "Toyota":["Active","Dynamic","Business","Design","Collection","GR Sport","Lounge","Première Édition"],
+ "Toyota":["Active","Dynamic","Dynamic Business","Business","Design","Design Business",
+           "Collection","GR Sport","Lounge","Première Édition"],
  "Hyundai":["Initia","Intuitive","Creative","Business","N Line","Executive","Edition #1"],
  "Kia":["Motion","Active","Design","Business","GT Line","Premium","GT Line Premium"],
  "Nissan":["Visia","Acenta","Business","N-Connecta","Tekna","Tekna+"],
@@ -2228,13 +2319,14 @@ const FINITIONS = {
 };
 const FINITIONS_DEF = ["Entrée de gamme","Finition intermédiaire","Finition haute"];
 function finitionsDe(marque){ return FINITIONS[marque] || FINITIONS_DEF; }
-/* Une entrée de gamme vaut environ sept pour cent de moins que la finition
-   moyenne, une finition haute treize pour cent de plus. */
+/* Les prix du catalogue sont des prix d'appel : « à partir de », donc finition
+   d'entrée. Monter dans l'échelle ne peut donc que majorer, d'un quart au bout.
+   C'est une approximation — le prix réel se saisit, et il prime. */
 function coefFinition(marque, f){
   if(!f) return 1;
   const l = finitionsDe(marque), i = l.indexOf(f);
   if(i < 0 || l.length < 2) return 1;
-  return 0.93 + (i / (l.length - 1)) * 0.20;
+  return 1 + (i / (l.length - 1)) * 0.25;
 }
 /* Ce qui distingue deux exemplaires du même modèle : la motorisation, puis la
    finition. C'est la ligne qu'on lit sous le nom, partout. */
@@ -2896,7 +2988,7 @@ function vueModal(m){
           '<span class="d">' + esc(LIB_ENERGIE(x.energie)) + ' · ' +
             (x.distrib === "chaine" ? "chaîne" : x.distrib === "courroie"
               ? "courroie " + nb(x.dk) + " km" : "distribution inconnue") + '</span></span>' +
-          '<span class="p">' + (x.prix ? fmtE(x.prix, true) + " neuf" : "") + '</span></button>').join("") +
+          '<span class="p">' + (x.prix ? "dès " + fmtE(x.prix, true) : "") + '</span></button>').join("") +
         '<button class="reslt" data-act="cat-moto" data-id="-1">' +
           '<span class="n">Je ne sais pas<span class="d">à préciser plus tard dans la fiche</span></span>' +
           '<span class="p">' + svg("chevron",14) + '</span></button>' +
@@ -2928,6 +3020,12 @@ function vueModal(m){
         '<div class="champ"><label for="m-km">Compteur aujourd\'hui</label>' +
           '<div class="mt-in"><input type="number" id="m-km" inputmode="numeric" value="' +
           (m.km||"") + '" placeholder="78400"><span class="mt-eur">km</span></div></div>' +
+        '<div class="champ"><label for="m-prix">Prix du neuf</label>' +
+          '<div class="mt-in"><input type="text" id="m-prix" inputmode="decimal" value="' +
+          (m.prix ? brut(m.prix) : "") + '" placeholder="estimé"><span class="mt-eur">€</span></div>' +
+          '<div class="aide">Estimé depuis le prix d\'appel de la motorisation et la finition. ' +
+          'Si tu as le prix du bon de commande ou de la facture, corrige-le : c\'est de ce chiffre ' +
+          'que part la cote.</div></div>' +
         '<div class="btns grow"><button class="btn" data-act="cat-retour">Retour</button>' +
         '<button class="btn pri" data-act="vehicule-ok">Ajouter</button></div>' +
         '<div class="aide">Le reste — dernière révision, contrôle technique, régime d\'entretien — se règle ' +
@@ -3137,6 +3235,7 @@ function capturerModal(){
     if(document.getElementById("m-mec")) m.mec = val("m-mec");
     if(document.getElementById("m-boite")) m.boite = val("m-boite");
     if(document.getElementById("m-finition")) m.finition = val("m-finition");
+    if(document.getElementById("m-prix")) m.prix = cents(val("m-prix"));
     if(document.getElementById("m-km")) m.km = entier("m-km");
     if(m.etape === "manuel"){
       m.marque = val("m-marque"); m.modele = val("m-modele");
@@ -3174,6 +3273,7 @@ function creerVehicule(o){
     km:Math.max(0, o.km || 0), kmDate:todayISO(), kmAn:0, revDate:"", revKm:0,
     ctDernier:"", ctResultat:"ok", prixNeuf:0, coteMan:0, plan:{}, note:"", cree:Date.now() };
   appliquerModele(v, o.marque, o.modele, o.moto);
+  if(o.prixNeuf > 0) v.prixNeuf = o.prixNeuf;   // un prix saisi prime toujours sur l'estimation
   if(o.energie) v.energie = o.energie;
   if(o.version) v.version = o.version;
   DB.vehicules[v.id] = v;
@@ -3242,6 +3342,8 @@ document.addEventListener("click", async ev => {
       return;
     }
     m.etape = "infos";
+    m.prixAuto = m.moto ? Math.round(m.moto.prix * coefFinition(m.marque, m.finition)) : 0;
+    m.prix = m.prixAuto;
     if(!m.mec){
       // La date n'est pas connue, mais l'année de lancement du modèle est une
       // borne basse honnête : elle évite une saisie partie de rien.
@@ -3267,6 +3369,7 @@ document.addEventListener("click", async ev => {
     const v = creerVehicule({
       marque:(m.marque||"").trim(), modele:(m.modele||"").trim(),
       moto:m.etape === "manuel" ? null : m.moto, finition:m.finition || "",
+      prixNeuf:m.prix || 0,
       version:m.etape === "manuel" ? (m.version||"").trim() : "",
       energie:m.etape === "manuel" ? m.energie : "",
       boite:m.boite, mec:m.mec, km:m.km });
@@ -3520,6 +3623,15 @@ document.addEventListener("change", ev => {
     render();
   }
   if(e.id === "m-ctres" || e.id === "m-ct"){ capturerModal(); render(); }
+  if(e.id === "m-finition"){
+    capturerModal();
+    const m = state.modal;
+    const auto = m.moto ? Math.round(m.moto.prix * coefFinition(m.marque, m.finition)) : 0;
+    // Un prix corrigé à la main ne se fait pas effacer par un changement de finition.
+    if(!m.prix || m.prix === m.prixAuto) m.prix = auto;
+    m.prixAuto = auto;
+    render();
+  }
 });
 
 /* ============================================================
